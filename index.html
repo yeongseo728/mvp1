@@ -2,41 +2,33 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
 <title>집콕체크</title>
 <style>
   :root{
     --bg:#f4f1e9; --navy:#14293d; --ink:#191f28; --body:#333d4b; --sub:#4e5968; --faint:#8b95a1; --line:#e5e8eb;
     --app:#f2f4f6;
     --lime:#a6e22e; --lime-dark:#4f7a06; --lime-soft:#f3f9e6; --lime-tag:#e3f2c0;
-    --beige:#f7f5ef; --warn:#fff4e8; --warn-ink:#b4530a; --ok:#e9f6ee; --ok-ink:#1f7a45;
+    --beige:#f7f5ef; --warn:#fff4e8; --warn-ink:#b4530a; --ok:#e9f6ee; --ok-ink:#1f7a45; --bad:#fdecec; --bad-ink:#c0362c;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--ink);font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.6;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
 
-  /* ---------- 페이지 상단 ---------- */
-  .wrap{max-width:1200px;margin:0 auto;padding:64px 20px 40px}
-  .eyebrow{font-size:14px;font-weight:700;letter-spacing:.08em;color:#4a6075}
-  h1{font-size:52px;font-weight:900;color:var(--navy);margin:8px 0 14px;letter-spacing:-.02em;line-height:1.2}
-  .lead{font-size:18px;color:var(--body);max-width:860px;line-height:1.7}
-  .rows{margin-top:32px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  .row{background:#fff;border-radius:18px;padding:22px 22px 24px;font-size:15px;color:var(--body);line-height:1.7}
-  .row b{display:block;font-size:13px;font-weight:800;color:var(--lime-dark);letter-spacing:.04em;margin-bottom:8px}
-  .hyp{display:inline-block;font-size:11px;font-weight:700;color:var(--faint);background:var(--app);border-radius:6px;padding:0 6px;margin-left:2px;vertical-align:1px}
-  .flow{margin:56px 0 28px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--navy)}
-  .flow span{background:#fff;border-radius:999px;padding:8px 16px}
-  .flow i{font-style:normal;color:var(--faint)}
-
   /* ---------- 기기 ---------- */
-  .phones{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;justify-items:center}
-  .phone-col{width:100%;max-width:360px}
-  .device{position:relative;width:100%;aspect-ratio:390/844;background:#0f1a26;border-radius:56px;padding:11px;box-shadow:0 30px 60px -24px rgba(20,41,61,.45);transition:box-shadow .3s}
-  .device.flash{box-shadow:0 0 0 5px var(--lime),0 30px 60px -24px rgba(20,41,61,.45)}
-  .screen{position:relative;height:100%;min-height:0;background:var(--app);border-radius:46px;overflow:hidden;display:flex;flex-direction:column}
+  .stage{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px 24px}
+  .device{position:relative;width:390px;max-width:100%;height:min(844px,calc(100dvh - 120px));min-height:640px;background:#0f1a26;border-radius:56px;padding:11px;box-shadow:0 30px 60px -24px rgba(20,41,61,.45)}
+  .screen{position:relative;height:100%;background:var(--app);border-radius:46px;overflow:hidden;display:flex;flex-direction:column}
   .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:96px;height:28px;background:#000;border-radius:20px;z-index:5}
   .status{height:48px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:6px 28px 0 32px;font-size:15px;font-weight:700;background:#fff}
   .status .icons{display:flex;gap:5px;align-items:center}
   .status svg{display:block}
+
+  /* 화면 전환 */
+  .views{position:relative;flex:1;min-height:0;overflow:hidden}
+  .view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--app);transform:translateX(100%);visibility:hidden;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s}
+  .view.on{transform:none;visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+  .view.past{transform:translateX(-28%)}
 
   .appbar{flex:none;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fff}
   .appbar .ib{width:36px;height:36px;display:grid;place-items:center;border:0;background:none;border-radius:10px;cursor:pointer}
@@ -62,7 +54,7 @@
   .meter .top b{color:var(--lime-dark)}
   .meter .top span{color:var(--sub)}
   .meter .track{height:8px;background:var(--app);border-radius:8px;overflow:hidden}
-  .meter .fill{width:17%;height:100%;background:var(--lime);transition:width .4s}
+  .meter .fill{width:0;height:100%;background:var(--lime);transition:width .4s}
 
   .card{background:#fff;border-radius:20px;margin:0 12px 12px;padding:20px}
   .card-t{font-size:17px;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline}
@@ -74,6 +66,9 @@
   .item:hover .qt{color:var(--navy)}
   .ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #d1d6db;display:grid;place-items:center;margin-top:2px}
   .item.done .ck{background:var(--navy);border-color:var(--navy)}
+  .item.done.lv-ok .ck{background:var(--ok-ink);border-color:var(--ok-ink)}
+  .item.done.lv-unsure .ck{background:var(--warn-ink);border-color:var(--warn-ink)}
+  .item.done.lv-bad .ck{background:var(--bad-ink);border-color:var(--bad-ink)}
   .item .txt{flex:1}
   .tg{font-size:13px;font-weight:700;color:var(--lime-dark);margin-bottom:2px}
   .qt{font-size:16px;font-weight:600;line-height:1.5}
@@ -83,6 +78,14 @@
   .item.cur:not(.done) .ck{border-color:var(--lime)}
   .item.cur .qt{color:var(--ink)}
   .now{display:inline-block;font-size:11px;font-weight:800;background:var(--lime);color:var(--navy);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+  .lv{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+  .lv.ok{background:var(--ok);color:var(--ok-ink)}
+  .lv.unsure{background:var(--warn);color:var(--warn-ink)}
+  .lv.bad{background:var(--bad);color:var(--bad-ink)}
+
+  .reset{display:block;margin:4px auto 0;font-size:14px;font-weight:600;font-family:inherit;color:var(--sub);background:none;border:0;padding:10px 16px;border-radius:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .reset:hover{background:#e5e8eb}
+  .note{font-size:12px;color:var(--faint);text-align:center;margin:14px 22px 0;line-height:1.6}
 
   /* 답변 입력 */
   .pills{display:flex;gap:6px;flex-wrap:wrap}
@@ -91,21 +94,28 @@
   .qbig{font-size:18px;font-weight:700;margin-top:12px;line-height:1.5}
   .why{background:var(--beige);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--body);margin-top:16px;line-height:1.65}
   .why b{display:block;color:var(--ink);margin-bottom:2px}
-  .lbl{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px}
-  .answer{border:2px solid var(--navy);border-radius:16px;padding:16px 16px 28px;font-size:16px;line-height:1.6;min-height:128px;position:relative}
+  .lbl{display:block;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px}
+  .answer{border:2px solid var(--line);border-radius:16px;padding:14px 16px 28px;position:relative;transition:border-color .15s}
+  .answer:focus-within{border-color:var(--navy)}
+  .answer textarea{display:block;width:100%;min-height:104px;border:0;outline:0;resize:none;background:transparent;font:inherit;font-size:16px;line-height:1.6;color:var(--ink)}
+  .answer textarea::placeholder{color:#b0b8c1}
   .answer .cnt{position:absolute;right:14px;bottom:8px;font-size:12px;color:var(--faint)}
   .field{margin-top:22px}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .chip{font-size:14px;font-weight:600;font-family:inherit;border:0;border-radius:999px;padding:8px 16px;color:var(--sub);background:var(--app);cursor:pointer;transition:background .15s,color .15s}
   .chip:hover{background:#e5e8eb}
   .chip.on{background:var(--navy);color:#fff}
+  .chips.lvl .chip.on[data-v="ok"]{background:var(--ok-ink)}
+  .chips.lvl .chip.on[data-v="unsure"]{background:var(--warn-ink)}
+  .chips.lvl .chip.on[data-v="bad"]{background:var(--bad-ink)}
   .hint{font-size:14px;color:var(--sub);margin:6px 22px 0;line-height:1.6}
 
   /* 영향 */
-  .mine{background:var(--beige);border-radius:14px;padding:14px 16px;font-size:15px;color:var(--body);margin-top:16px}
-  .mine small{display:block;font-size:12px;font-weight:700;color:var(--faint);margin-bottom:4px}
+  .mine{background:var(--beige);border-radius:14px;padding:14px 16px;font-size:15px;color:var(--body);margin-top:16px;white-space:pre-wrap}
+  .mine small{display:block;font-size:12px;font-weight:700;color:var(--faint);margin-bottom:4px;white-space:normal}
   .badge{display:inline-block;font-size:13px;font-weight:800;color:var(--warn-ink);background:var(--warn);border-radius:999px;padding:4px 12px}
   .badge.ok{color:var(--ok-ink);background:var(--ok)}
+  .badge.bad{color:var(--bad-ink);background:var(--bad)}
   .impact h3{font-size:19px;font-weight:800;margin:12px 0 8px;line-height:1.4}
   .impact p{font-size:15px;color:var(--body);line-height:1.7}
   .risk{background:var(--warn);border-radius:14px;padding:14px 16px;margin-top:16px;font-size:14px;color:#5c3410;line-height:1.65}
@@ -126,50 +136,40 @@
   .btn:active{transform:scale(.98)}
   .btn.lime{background:var(--lime);color:var(--navy)}
   .btn:disabled{background:#d1d6db;color:#fff;cursor:not-allowed;filter:none;transform:none}
-  .home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:120px;height:5px;border-radius:5px;background:#191f28}
+  .home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:120px;height:5px;border-radius:5px;background:#191f28;z-index:5}
 
-  .toast{position:absolute;left:16px;right:16px;bottom:108px;background:rgba(25,31,40,.92);color:#fff;font-size:14px;font-weight:600;border-radius:14px;padding:12px 16px;opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;pointer-events:none}
+  .toast{position:absolute;left:16px;right:16px;bottom:108px;z-index:6;background:rgba(25,31,40,.92);color:#fff;font-size:14px;font-weight:600;border-radius:14px;padding:12px 16px;opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;pointer-events:none}
   .toast.show{opacity:1;transform:none}
 
-  .name{text-align:center;margin-top:18px;font-size:16px;font-weight:800;color:var(--navy)}
-  .name small{display:block;font-weight:500;font-size:14px;color:var(--sub)}
-  footer{text-align:center;font-size:14px;color:var(--sub);padding:56px 0 8px}
+  footer{text-align:center;font-size:14px;color:var(--sub);padding:24px 0 0}
   footer small{display:block;font-size:12px;color:var(--faint);margin-top:4px}
 
-  @media (max-width:1000px){
-    .phones{grid-template-columns:1fr;gap:48px}
-    .rows{grid-template-columns:1fr}
-  }
+  /* 휴대폰에서는 화면 전체를 앱으로 */
   @media (max-width:520px){
-    h1{font-size:38px}
-    .lead{font-size:16px}
-    .flow{justify-content:flex-start}
+    .stage{display:block;padding:0}
+    .device{width:100%;height:100vh;height:100dvh;min-height:0;border-radius:0;padding:0;box-shadow:none;background:var(--app)}
+    .screen{border-radius:0}
+    .island,.status,.home,footer{display:none}
+    .appbar{padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top))}
+    .cta{padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .view,.view.on{transition:none}
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <p class="eyebrow">UI CONCEPT · 전월세 계약 도움 서비스</p>
-  <h1>집콕체크</h1>
-  <p class="lead">공인중개사와 집을 계약할 때 공인중개사와 집주인에게 물어야 할 질문들을 체크리스트로 제공하고, 받은 답변을 입력하면 그에 따른 주의사항과 행동요령을 알려주는 앱 <span class="hyp">가설</span></p>
+<div class="stage">
+  <div class="device"><div class="screen">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="icons">
+      <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#191f28"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#191f28"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#191f28"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#191f28"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3.5" fill="none" stroke="#191f28" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#191f28"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="#191f28" opacity=".4"/></svg>
+    </span></div>
 
-  <div class="rows">
-    <div class="row"><b>문제</b>공인중개사나 집주인에게 무엇을 물어봐야 하는지, 받은 답변이 애매할 때 그것이 이후 법적 분쟁이나 법적 보호에 어떤 영향을 미칠지, 어떻게 대응해야 하는지도 판단하기 어렵다. <span class="hyp">가설</span></div>
-    <div class="row"><b>고객</b>신촌에서 부동산을 통해 혼자 전월세 계약을 진행하는 대학생. 주거 탐색은 마쳤고, 계약 전 확인과 계약 판단이 필요한 사람. <span class="hyp">가설</span></div>
-    <div class="row"><b>핵심 가치</b>계약 단계에서 확인할 정보를 단계적으로 체크리스트로 모아주고, 물어볼 질문을 제시하며, 입력한 답변이 미칠 영향과 다음 행동을 안내한다. <span class="hyp">가설</span></div>
-  </div>
-
-  <div class="flow"><span>① 질문 선택</span><i>→</i><span>② 답변 입력</span><i>→</i><span>③ 영향·추천 행동</span><i>→</i><span>체크리스트로</span></div>
-
-  <div class="phones">
-    <!-- 1. 질문화면 -->
-    <div class="phone-col">
-      <div class="device" id="p1"><div class="screen">
-        <div class="island"></div>
-        <div class="status"><span>9:41</span><span class="icons">
-          <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#191f28"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#191f28"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#191f28"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#191f28"/></svg>
-          <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3.5" fill="none" stroke="#191f28" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#191f28"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="#191f28" opacity=".4"/></svg>
-        </span></div>
+    <div class="views">
+      <!-- ① 질문 목록 -->
+      <section class="view on" id="p1" aria-label="질문 목록">
         <div class="appbar">
           <span class="logo"><i>✓</i>집콕체크</span>
           <span class="step-ind">1 / 3</span>
@@ -178,44 +178,23 @@
         <div class="scroll">
           <div class="hero">
             <h2>계약 전,<br>무엇을 물어볼까요?</h2>
-            <p class="desc">질문을 눌러 고른 뒤 답변을 입력하세요.</p>
+            <p class="desc">질문을 누르고 들은 답변을 적어 보세요.</p>
             <div class="meter">
-              <div class="top"><span>확인한 질문</span><b id="meterText">2 / 12</b></div>
+              <div class="top"><span>확인한 질문</span><b id="meterText">0 / 15</b></div>
               <div class="track"><div class="fill" id="meterFill"></div></div>
             </div>
           </div>
-          <div class="card" data-sec>
-            <div class="card-t">1. 상대방 확인<small></small></div>
-            <div class="item" data-id="q1" role="button" tabindex="0"><span class="ck"></span><div class="txt"><p class="tg"></p><p class="qt"></p></div></div>
-            <div class="item" data-id="q2" role="button" tabindex="0"><span class="ck"></span><div class="txt"><p class="tg"></p><p class="qt"></p></div></div>
-          </div>
-          <div class="card" data-sec>
-            <div class="card-t">2. 권리관계 확인<small></small></div>
-            <div class="item" data-id="q3" role="button" tabindex="0"><span class="ck"></span><div class="txt"><p class="tg"></p><p class="qt"></p></div></div>
-            <div class="item" data-id="q4" role="button" tabindex="0"><span class="ck"></span><div class="txt"><p class="tg"></p><p class="qt"></p></div></div>
-          </div>
-          <div class="card" data-sec>
-            <div class="card-t">3. 관리비·수리<small></small></div>
-            <div class="item" data-id="q5" role="button" tabindex="0"><span class="ck"></span><div class="txt"><p class="tg"></p><p class="qt"></p></div></div>
-          </div>
+          <div id="list"></div>
+          <button type="button" class="reset" id="reset">처음부터 다시 하기</button>
+          <p class="note">적은 답변은 이 기기에만 저장돼요.<br>참고용 안내이며 법률 자문이 아니에요.</p>
         </div>
-        <div class="toast" id="toast1"></div>
-        <div class="cta"><button type="button" class="btn" id="toAnswer">답변 입력하기</button></div>
-        <div class="home"></div>
-      </div></div>
-      <p class="name">① 질문화면<small>단계별 질문 체크리스트</small></p>
-    </div>
+        <div class="cta"><button type="button" class="btn" id="toAnswer">이어서 확인하기</button></div>
+      </section>
 
-    <!-- 2. 답변입력 -->
-    <div class="phone-col">
-      <div class="device" id="p2"><div class="screen">
-        <div class="island"></div>
-        <div class="status"><span>9:41</span><span class="icons">
-          <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#191f28"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#191f28"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#191f28"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#191f28"/></svg>
-          <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3.5" fill="none" stroke="#191f28" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#191f28"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="#191f28" opacity=".4"/></svg>
-        </span></div>
+      <!-- ② 답변 입력 -->
+      <section class="view" id="p2" aria-label="답변 입력">
         <div class="appbar">
-          <button type="button" class="ib" data-go="p1" aria-label="뒤로"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M14 4l-7 7 7 7" stroke="#191f28" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="ib" data-back aria-label="뒤로"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M14 4l-7 7 7 7" stroke="#191f28" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <span class="title">답변 기록</span>
           <span class="step-ind">2 / 3</span>
         </div>
@@ -226,40 +205,35 @@
             <p class="desc">들은 내용을 그대로 적어도 돼요.</p>
           </div>
           <div class="card">
-            <div class="pills"><span class="pill">확인할 질문</span><span class="pill gray" id="a-cat"></span></div>
+            <div class="pills"><span class="pill" id="a-num"></span><span class="pill gray" id="a-cat"></span></div>
             <p class="qbig" id="a-q"></p>
             <div class="why"><b>왜 물어봐야 하나요?</b><span id="a-why"></span></div>
           </div>
           <div class="card">
-            <p class="lbl">상대방의 답변</p>
-            <div class="answer"><span id="a-ans"></span><span class="cnt" id="a-cnt"></span></div>
+            <label class="lbl" for="a-ans">상대방의 답변</label>
+            <div class="answer"><textarea id="a-ans" maxlength="300" rows="4" placeholder="들은 말을 그대로 적어 주세요.&#10;예) 대출이 1억 정도 있다고 했어요."></textarea><span class="cnt" id="a-cnt">0 / 300</span></div>
             <div class="field">
               <p class="lbl">누가 답했나요?</p>
-              <div class="chips" data-group="who"><button type="button" class="chip on">공인중개사</button><button type="button" class="chip">집주인</button></div>
+              <div class="chips" data-group="who"><button type="button" class="chip" data-v="공인중개사">공인중개사</button><button type="button" class="chip" data-v="집주인">집주인</button></div>
             </div>
             <div class="field">
               <p class="lbl">어떻게 들었나요?</p>
-              <div class="chips" data-group="how"><button type="button" class="chip on">구두로 들음</button><button type="button" class="chip">문자·메신저</button><button type="button" class="chip">서류로 확인</button></div>
+              <div class="chips" data-group="how"><button type="button" class="chip" data-v="구두로 들음">구두로 들음</button><button type="button" class="chip" data-v="문자·메신저">문자·메신저</button><button type="button" class="chip" data-v="서류로 확인">서류로 확인</button></div>
+            </div>
+            <div class="field">
+              <p class="lbl">답변이 어땠나요?</p>
+              <div class="chips lvl" data-group="level"><button type="button" class="chip" data-v="ok">괜찮아 보여요</button><button type="button" class="chip" data-v="unsure">애매하거나 모르겠어요</button><button type="button" class="chip" data-v="bad">문제가 있어요</button></div>
             </div>
           </div>
-          <p class="hint">입력한 답변을 바탕으로 관련 법률과 행동요령을 안내해요.</p>
+          <p class="hint">고른 내용에 맞춰 영향과 행동요령, 관련 법률을 안내해요.</p>
         </div>
         <div class="cta"><button type="button" class="btn" id="toResult">영향 확인하기</button></div>
-        <div class="home"></div>
-      </div></div>
-      <p class="name">② 답변입력<small>받은 답변을 그대로 기록</small></p>
-    </div>
+      </section>
 
-    <!-- 3. 영향행동 -->
-    <div class="phone-col">
-      <div class="device" id="p3"><div class="screen">
-        <div class="island"></div>
-        <div class="status"><span>9:41</span><span class="icons">
-          <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#191f28"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#191f28"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#191f28"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#191f28"/></svg>
-          <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3.5" fill="none" stroke="#191f28" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#191f28"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="#191f28" opacity=".4"/></svg>
-        </span></div>
+      <!-- ③ 영향·추천 행동 -->
+      <section class="view" id="p3" aria-label="영향 확인">
         <div class="appbar">
-          <button type="button" class="ib" data-go="p2" aria-label="뒤로"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M14 4l-7 7 7 7" stroke="#191f28" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="ib" data-back aria-label="뒤로"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M14 4l-7 7 7 7" stroke="#191f28" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <span class="title">영향 확인</span>
           <span class="step-ind">3 / 3</span>
         </div>
@@ -283,153 +257,311 @@
             <div class="card-t">관련 법률</div>
             <div id="r-laws"></div>
           </div>
+          <p class="note">참고용 안내이며 법률 자문이 아니에요.<br>중요한 결정 전에는 전문가와 상담하세요.</p>
         </div>
         <div class="cta"><button type="button" class="btn lime" id="toList">체크리스트로 돌아가기</button></div>
-        <div class="home"></div>
-      </div></div>
-      <p class="name">③ 영향행동<small>영향 · 추천 행동 · 관련 법률</small></p>
+      </section>
     </div>
-  </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="home"></div>
+  </div></div>
 
   <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-08</small></footer>
 </div>
 
 <script>
-const TOTAL = 12;
-const Q = {
-  q1:{cat:'상대방 확인',tag:'집주인 본인 확인',q:'계약할 때 집주인 본인과 직접 계약할 수 있나요?',
-      why:'대리인과 계약하면 권한이 없을 경우 계약 효력이 문제될 수 있어요.',
-      ans:'집주인은 지방에 있어서 가족분이 대신 계약하러 온다고 했어요.',
-      level:'warn',title:'대리인과 계약하는 경우',
-      impact:'대리인에게 정당한 권한이 없으면 집주인이 계약을 인정하지 않을 수 있어요. 이 경우 보증금을 돌려받기 어려워질 수 있어요.',
-      risk:'"가족이라서 괜찮다"는 말만으로는 대리 권한이 확인되지 않아요.',
-      acts:['위임장과 집주인 인감증명서 원본 확인하기','계약 전 집주인과 직접 통화해 위임 사실 확인하기','보증금은 반드시 집주인 명의 계좌로 보내기'],
-      laws:[['민법 제114조 (대리행위의 효력)','대리인이 권한 안에서 본인을 위해 한 계약은 본인에게 효력이 생겨요.'],['민법 제130조 (무권대리)','대리권 없는 사람이 맺은 계약은 본인이 추인하지 않으면 본인에게 효력이 없어요.']]},
-  q2:{cat:'상대방 확인',tag:'정보 일치 확인',q:'등기부등본의 소유자와 계약 상대방이 같은가요?',
-      why:'소유자가 아닌 사람과 계약하면 보증금을 보호받기 어려워요.',
-      ans:'중개사님이 등기부등본을 보여줬고 소유자 이름이 신분증과 같았어요.',
-      level:'ok',title:'소유자와 계약자가 일치하는 경우',
-      impact:'계약 상대방이 실제 소유자이므로 기본 요건은 갖췄어요. 다만 잔금일 전에 소유자가 바뀌거나 새 권리가 생길 수 있어요.',
-      risk:'계약일에 본 등기부등본이 잔금일에도 같다는 보장은 없어요.',
-      acts:['잔금 직전에 등기부등본을 다시 발급해 확인하기','신분증 진위 확인 서비스로 신분증 확인하기','중개대상물 확인·설명서에 소유자 정보 기재 확인하기'],
-      laws:[['공인중개사법 제25조 (중개대상물의 확인·설명)','중개사는 권리관계 등을 확인해 근거 자료와 함께 설명해야 해요.']]},
-  q3:{cat:'권리관계 확인',tag:'근저당 확인',q:'이 집에 대출(근저당)이 있나요? 있다면 금액은 얼마인가요?',
-      why:'경매 시 대출이 보증금보다 먼저 변제되어 보증금 회수 가능성과 직결돼요.',
-      ans:'은행 대출이 1억 정도 있다고 했어요. 집값이 3억이라 괜찮다고 합니다.',
-      level:'warn',title:'집에 근저당이 있는 경우',
-      impact:'경매로 넘어가면 먼저 설정된 근저당이 먼저 돈을 가져가요. 대출과 보증금을 합친 금액이 집값에 가까울수록 위험이 커져요.',
-      risk:'"1억 정도"는 정확하지 않아요. 등기부등본의 채권최고액으로 직접 확인해야 해요.',
-      acts:['등기부등본 발급해 채권최고액 확인하기','특약에 "잔금일까지 근저당 말소" 넣기 요청','입주 당일 전입신고·확정일자 받기'],
-      laws:[['민법 제356조 (저당권의 내용)','저당권자는 경매 대금에서 다른 채권자보다 먼저 변제받을 권리가 있어요.'],['주택임대차보호법 제3조의2','전입신고와 확정일자를 갖추면 그 뒤 권리보다 우선하지만, 이미 있는 근저당보다 앞서지는 못해요.']]},
-  q4:{cat:'권리관계 확인',tag:'선순위 임차인',q:'이 건물에 먼저 들어와 사는 세입자의 보증금은 얼마인가요?',
-      why:'다가구 주택은 먼저 들어온 세입자의 보증금이 내 보증금보다 먼저 변제돼요.',
-      ans:'다른 방 세입자들 보증금은 잘 모르겠다고, 다들 소액이라고만 했어요.',
-      level:'warn',title:'선순위 보증금을 모르는 경우',
-      impact:'건물 전체 보증금과 대출이 집값을 넘으면 경매 시 내 보증금이 남지 않을 수 있어요.',
-      risk:'"다들 소액"이라는 말은 확인된 정보가 아니에요. 숫자로 확인해야 해요.',
-      acts:['집주인 동의를 받아 확정일자 부여 현황 열람 요청하기','전입세대 확인서로 실제 거주 세대 수 확인하기','확인이 어렵다면 계약 보류도 고려하기'],
-      laws:[['주택임대차보호법 제3조의6','계약하려는 사람은 임대인 동의를 받아 확정일자 부여일·보증금 등 정보를 요청할 수 있어요.'],['주택임대차보호법 제8조','소액임차인은 일정 금액까지 다른 담보권자보다 우선 변제받을 수 있어요.']]},
-  q5:{cat:'관리비·수리',tag:'관리비 항목',q:'관리비에 어떤 항목이 포함되어 있나요?',
-      why:'관리비 항목이 불명확하면 입주 후 추가 비용 분쟁이 생기기 쉬워요.',
-      ans:'관리비 5만 원이고 인터넷이랑 수도는 포함이라고 했어요.',
-      level:'ok',title:'관리비 항목을 들은 경우',
-      impact:'포함 항목을 들었다면 비교 기준이 생겼어요. 계약서에 남겨야 입주 후 다른 말이 나와도 대응할 수 있어요.',
-      risk:'말로만 들은 포함 항목은 나중에 바뀌어도 증명하기 어려워요.',
-      acts:['관리비 금액과 포함 항목을 계약서 특약에 적기','전기·가스 등 별도 요금 예상 금액 물어보기','고장 시 수리 책임을 누가 지는지 특약에 넣기'],
-      laws:[['공인중개사법 제25조 (중개대상물의 확인·설명)','중개사는 중개대상물의 상태와 거래 조건 등을 확인해 설명해야 해요.'],['민법 제623조 (임대인의 의무)','임대인은 계약 기간 동안 집을 사용할 수 있는 상태로 유지해야 해요.']]}
-};
-const ORDER = ['q1','q2','q3','q4','q5'];
+// 질문 데이터: res는 고른 답변 상태(ok·unsure·bad)별 [제목, 영향 설명]
+const Q = [
+  {cat:'상대방 확인',tag:'집주인 본인 확인',q:'계약할 때 집주인 본인과 직접 계약할 수 있나요?',
+   why:'본인이 아니라 대리인이 나오면 위임장·인감증명서로 계약 권한을 확인해야 해요. 서류 없이 계약하면 나중에 계약 효력을 다툴 여지가 생겨요.',
+   res:{ok:['집주인 본인과 직접 계약하는 경우','계약 상대방이 집주인 본인이라 대리 권한 문제는 없어요. 신분증과 등기부등본의 소유자 이름이 같은지만 확인하면 돼요.'],
+        unsure:['누가 나올지 확실하지 않은 경우','계약 당일에 대리인이 나오면 그 자리에서 권한을 확인하기 어려워요. 누가 나오는지, 어떤 서류를 가져오는지 미리 확인해야 해요.'],
+        bad:['대리인과 계약해야 하는 경우','대리인에게 정당한 권한이 없으면 집주인이 계약을 인정하지 않을 수 있어요. 이 경우 보증금을 돌려받기 어려워질 수 있어요.']},
+   risk:'"가족이라서 괜찮다"는 말만으로는 대리 권한이 확인되지 않아요.',
+   acts:['대리인이라면 위임장과 집주인 인감증명서 원본 확인하기','계약 전 집주인과 직접 통화해 위임 사실 확인하기','보증금은 반드시 집주인 명의 계좌로 보내기'],
+   laws:[['민법 제114조 (대리행위의 효력)','대리인이 권한 안에서 본인을 위해 한 계약은 본인에게 효력이 생겨요.'],['민법 제130조 (무권대리)','대리권 없는 사람이 맺은 계약은 본인이 인정하지 않으면 본인에게 효력이 없어요.']]},
+  {cat:'상대방 확인',tag:'정보 일치 확인',q:'계약서의 임대인 정보와 계약 상대방 정보가 같은가요?',
+   why:'등기부상 소유자와 계약서의 임대인, 실제로 나온 사람이 다르면 사기일 가능성이 있어 꼭 확인해야 해요.',
+   res:{ok:['세 정보가 모두 같은 경우','등기부 소유자, 계약서 임대인, 실제 계약 상대방이 같아서 기본 요건은 갖췄어요. 다만 잔금일 전에 소유자가 바뀌거나 새 권리가 생길 수 있어요.'],
+        unsure:['아직 직접 대조하지 못한 경우','말로만 "같다"고 들은 상태라면 확인된 게 아니에요. 등기부등본과 신분증을 나란히 놓고 직접 비교해야 해요.'],
+        bad:['정보가 서로 다른 경우','소유자가 아닌 사람과 계약하면 보증금을 보호받기 어려워요. 이유가 분명히 설명되고 서류로 확인되기 전에는 계약하지 않는 것이 안전해요.']},
+   risk:'계약일에 본 등기부등본이 잔금일에도 같다는 보장은 없어요.',
+   acts:['인터넷등기소에서 등기부등본을 직접 발급해 소유자 확인하기','정부24 등 신분증 진위 확인 서비스로 신분증 확인하기','잔금 직전에 등기부등본을 한 번 더 발급해 확인하기'],
+   laws:[['공인중개사법 제25조 (중개대상물의 확인·설명)','중개사는 권리관계 등을 확인해 근거 자료와 함께 설명해야 해요.'],['민법 제130조 (무권대리)','권한 없는 사람이 맺은 계약은 실제 소유자가 인정하지 않으면 효력이 없어요.']]},
+  {cat:'상대방 확인',tag:'공동명의 확인',q:'집주인이 여러 명이라면 모두 계약에 동의했나요?',
+   why:'여러 명이 함께 가진 집은 일부 소유자만 계약하면 계약 효력에 문제가 생길 수 있어요.',
+   res:{ok:['소유자 모두 동의한 경우','공동 소유자 모두가 계약서에 서명했거나, 오지 않은 사람의 위임장과 인감증명서를 받았다면 기본 요건을 갖췄어요. 소유자가 한 명이라면 이 질문은 해당하지 않아요.'],
+        unsure:['동의 여부를 모르는 경우','등기부등본 "갑구"에서 소유자가 몇 명인지, 각자 지분이 얼마인지 먼저 확인해야 해요.'],
+        bad:['일부 소유자만 계약하는 경우','지분이 절반을 넘지 않는 소유자와만 계약하면 나머지 소유자가 계약을 인정하지 않을 수 있어요.']},
+   risk:'"다른 소유자는 가족이라 괜찮다"는 말만으로는 동의가 확인되지 않아요.',
+   acts:['등기부등본 갑구에서 소유자 수와 지분 확인하기','계약에 오지 않은 소유자의 위임장과 인감증명서 받기','계약서에 소유자 전원의 이름 적기'],
+   laws:[['민법 제265조 (공유물의 관리)','집을 빌려주는 것 같은 관리 행위는 지분의 과반수로 정해요.'],['민법 제130조 (무권대리)','동의하지 않은 소유자에게는 그 사람이 인정하지 않는 한 계약 효력이 미치지 않아요.']]},
+  {cat:'상대방 확인',tag:'중개사 정상 영업 확인',q:'사업자등록증, 중개사 자격증, 중개사무소 등록증, 공제증서 등을 확인해 공인중개사가 정상적으로 영업하는지 확인하셨나요?',
+   why:'등록하지 않은 중개업자나 빌린 자격증으로 하는 불법 중개를 피하고, 사고가 났을 때 손해배상 공제로 보장받으려면 미리 확인해야 해요.',
+   res:{ok:['정상 등록된 중개사인 경우','사무소에 등록증·자격증·공제증서가 걸려 있고, 이름과 얼굴이 실제 중개사와 같다면 기본 확인은 끝났어요.'],
+        unsure:['서류를 제대로 못 본 경우','국가공간정보포털이나 구청에서 중개사무소 등록 여부를 조회할 수 있어요. 계약 전에 꼭 조회해 보세요.'],
+        bad:['등록이 확인되지 않는 경우','무등록 중개업자와 거래하면 사고가 나도 공제로 보상받기 어려워요. 다른 중개사무소를 이용하는 것이 안전해요.']},
+   risk:'자격증의 사진·이름과 실제로 상담한 사람이 다르면 자격증을 빌린 것일 수 있어요.',
+   acts:['국가공간정보포털 "부동산중개업 조회"로 등록 여부 확인하기','공제증서의 보장 기간과 금액 확인하기','상담한 사람이 자격증 주인인지 확인하기'],
+   laws:[['공인중개사법 제17조 (중개사무소등록증 등의 게시)','중개사는 등록증·자격증 등을 사무소 안 잘 보이는 곳에 걸어 두어야 해요.'],['공인중개사법 제30조 (손해배상책임의 보장)','중개사는 중개 사고에 대비해 보증보험이나 공제에 가입해야 해요.']]},
+  {cat:'권리관계 확인',tag:'근저당 확인',q:'이 집에 대출(근저당)이 있나요? 있다면 금액은 얼마인가요?',
+   why:'경매로 넘어가면 대출이 보증금보다 먼저 갚아지기 때문에, 보증금을 돌려받을 수 있는지와 바로 이어져요.',
+   res:{ok:['근저당이 없거나 작은 경우','등기부등본에 근저당이 없거나 집값에 비해 아주 작다면, 경매가 되더라도 보증금을 돌려받을 가능성이 높아요.'],
+        unsure:['금액을 정확히 모르는 경우','"대출이 조금 있다" 같은 말로는 판단할 수 없어요. 등기부등본 "을구"의 채권최고액을 직접 확인해야 해요.'],
+        bad:['근저당이 큰 경우','경매로 넘어가면 먼저 설정된 근저당이 먼저 돈을 가져가요. 대출과 보증금을 합친 금액이 집값에 가까울수록 보증금을 잃을 위험이 커요.']},
+   risk:'"1억 정도"는 정확하지 않아요. 등기부등본의 채권최고액으로 직접 확인해야 해요.',
+   acts:['등기부등본 을구에서 채권최고액 확인하기','특약에 "잔금일까지 근저당 말소" 넣기 요청하기','입주 당일 전입신고하고 확정일자 받기'],
+   laws:[['민법 제356조 (저당권의 내용)','저당권자는 경매 대금에서 다른 채권자보다 먼저 변제받을 권리가 있어요.'],['주택임대차보호법 제3조의2 (보증금의 회수)','전입신고와 확정일자를 갖추면 그 뒤 권리보다 우선하지만, 이미 있는 근저당보다 앞서지는 못해요.']]},
+  {cat:'권리관계 확인',tag:'선순위 보증금',q:'먼저 살고 있는 세입자들의 보증금 합계는 얼마인가요?',
+   why:'다가구 원룸은 먼저 들어온 세입자의 보증금이 우선이라 내 순위가 밀릴 수 있어요.',
+   res:{ok:['선순위 보증금을 확인한 경우','숫자로 확인했고, 대출과 합쳐도 집값보다 넉넉히 적다면 비교적 안전해요.'],
+        unsure:['정확한 금액을 모르는 경우','"다들 소액"이라는 말은 확인된 정보가 아니에요. 집주인 동의를 받아 확정일자 현황을 확인해야 해요.'],
+        bad:['선순위 보증금이 큰 경우','건물 전체 보증금과 대출이 집값을 넘으면 경매 때 내 보증금이 남지 않을 수 있어요. 계약을 다시 생각해 보는 것이 안전해요.']},
+   risk:'다가구 주택은 등기부등본에 세입자 보증금이 나오지 않아요.',
+   acts:['집주인 동의를 받아 확정일자 부여 현황 열람하기','전입세대 확인서로 실제 사는 세대 수 확인하기','확인이 어렵다면 계약 보류도 생각하기'],
+   laws:[['주택임대차보호법 제3조의6 (확정일자 부여 및 임대차 정보제공 등)','계약하려는 사람은 집주인 동의를 받아 확정일자 부여일·보증금 등 정보를 요청할 수 있어요.'],['주택임대차보호법 제8조 (보증금 중 일정액의 보호)','소액임차인은 일정 금액까지 다른 담보권자보다 먼저 변제받을 수 있어요.']]},
+  {cat:'권리관계 확인',tag:'보증보험 가능 여부',q:'보증금 반환보증에 가입할 수 있는 집인가요?',
+   why:'가입이 안 되는 집이라면 권리관계나 건물에 문제가 있다는 신호일 수 있어요.',
+   res:{ok:['보증 가입이 가능한 경우','보증기관 기준을 통과하는 집이라면, 집주인이 보증금을 못 돌려줘도 보증기관에서 대신 받을 수 있어요.'],
+        unsure:['가입 가능한지 모르는 경우','보증기관 누리집이나 앱에서 주소와 보증금을 넣고 가입 가능 여부를 미리 확인해 볼 수 있어요.'],
+        bad:['보증 가입이 안 되는 경우','가입이 안 되는 이유가 대출이 많아서인지, 건물 용도 때문인지 확인해야 해요. 이유가 풀리지 않으면 위험 신호로 봐야 해요.']},
+   risk:'"보증보험은 필요 없다"는 말에 넘어가지 마세요. 가입할 수 있는지는 직접 확인해야 해요.',
+   acts:['HUG·HF·SGI서울보증 중 한 곳에서 가입 가능 여부 미리 조회하기','특약에 "보증 가입이 안 되면 계약을 해제하고 계약금을 돌려준다" 넣기','입주 후 가입 기간 안에 신청하기'],
+   laws:[['주택임대차보호법 제3조의2 (보증금의 회수)','전입신고와 확정일자를 갖추면 경매 때 뒤 순위 권리보다 먼저 보증금을 받을 수 있어요.'],['참고 · 보증기관 가입 기준','보증금 한도, 부채 비율, 건물 용도 같은 가입 조건은 각 보증기관 기준을 따라요.']]},
+  {cat:'권리관계 확인',tag:'세금 완납 확인',q:'국세, 지방세를 완납하셨나요?',
+   why:'집주인이 밀린 세금이 있으면 경매 때 세금이 내 보증금보다 먼저 빠져나가 보증금을 떼일 위험이 있어요.',
+   res:{ok:['세금을 모두 낸 것을 확인한 경우','납세증명서로 밀린 세금이 없다는 것을 확인했다면, 세금 때문에 보증금 순위가 밀릴 걱정은 줄어요.'],
+        unsure:['말로만 들은 경우','"세금 밀린 거 없다"는 말은 증명이 아니에요. 국세·지방세 납세증명서를 보여 달라고 요청해야 해요.'],
+        bad:['밀린 세금이 있는 경우','밀린 세금은 경매 때 내 보증금보다 먼저 가져갈 수 있어요. 잔금 전에 모두 내기로 하고 특약에 적거나, 계약을 다시 생각해 보세요.']},
+   risk:'계약한 뒤에 생긴 체납은 계약할 때 알 수 없어요. 잔금 직전에도 다시 확인하면 좋아요.',
+   acts:['집주인에게 국세·지방세 납세증명서 보여 달라고 요청하기','집주인 동의를 받아 세무서·주민센터에서 미납 세금 열람하기','특약에 "잔금일까지 밀린 세금 완납" 넣기'],
+   laws:[['주택임대차보호법 제3조의7 (임대인의 정보 제시 의무)','집주인은 계약할 때 확정일자 정보와 납세증명서를 세입자에게 보여 줘야 해요.'],['국세기본법 제35조 (국세의 우선)','국세는 원칙적으로 다른 채권보다 먼저 받아 가요.']]},
+  {cat:'집 상태 확인',tag:'건축물 용도',q:'건축물대장상 주거용으로 등록된 방인가요?',
+   why:'근린생활시설이나 불법으로 고친 방은 보증보험 가입이나 법적 보호에 제약이 생길 수 있어요.',
+   res:{ok:['주거용으로 등록된 경우','건축물대장에 다가구주택·다세대주택 같은 주거용으로 되어 있다면 기본 요건을 갖췄어요.'],
+        unsure:['용도를 모르는 경우','정부24에서 건축물대장을 무료로 떼어 볼 수 있어요. "용도"와 "위반건축물" 표시를 확인하세요.'],
+        bad:['주거용이 아니거나 위반건축물인 경우','근린생활시설을 방으로 고친 곳은 보증 가입이 어렵고, 나중에 원상복구 명령이 나오면 이사해야 할 수도 있어요.']},
+   risk:'겉보기엔 원룸이어도 서류상 "근린생활시설"인 경우가 많아요.',
+   acts:['정부24에서 건축물대장 발급해 용도 확인하기','"위반건축물" 표시가 있는지 확인하기','실제 호수와 건축물대장의 호수가 같은지 확인하기'],
+   laws:[['주택임대차보호법 제2조 (적용 범위)','주거용 건물을 빌린 경우에 이 법의 보호를 받아요. 실제로 주거용으로 쓰는지도 함께 따져요.'],['건축법 제19조 (용도변경)','건물 용도를 바꾸려면 허가를 받거나 신고해야 해요.']]},
+  {cat:'계약 조건 확인',tag:'보증금 반환 시점',q:'계약이 끝나는 날, 다음 세입자가 없어도 보증금을 바로 돌려받을 수 있나요?',
+   why:'"다음 세입자가 들어와야 준다"는 조건이 붙으면 이사 나간 뒤에도 돌려받는 날이 몇 달씩 밀릴 수 있어요. 특약으로 남겨 두는 게 안전해요.',
+   res:{ok:['만기일에 돌려주기로 한 경우','계약이 끝나는 날 바로 돌려주기로 했다면 좋아요. 이 내용을 특약에 문장으로 남겨 두세요.'],
+        unsure:['돌려주는 날이 애매한 경우','"그때 가서 맞춰 줄게요" 같은 답은 약속이 아니에요. 정확한 날짜를 특약에 적어 달라고 요청하세요.'],
+        bad:['다음 세입자가 와야 준다는 경우','이 조건이 있으면 이사 나간 뒤에도 몇 달씩 보증금을 못 받을 수 있어요. 특약에 만기일 반환을 넣거나, 계약을 다시 생각해 보세요.']},
+   risk:'보증금을 받기 전에 이사하고 전입신고를 옮기면 보호를 잃을 수 있어요. 이럴 땐 임차권등기명령을 먼저 신청하세요.',
+   acts:['특약에 "계약 종료일에 보증금 전액 반환" 넣기','계약을 끝낼 거라면 만기 2개월 전까지 문자로 알리기','못 받으면 이사 전에 임차권등기명령 신청하기'],
+   laws:[['주택임대차보호법 제4조 (임대차기간 등)','계약이 끝나도 보증금을 돌려받을 때까지는 임대차 관계가 이어지는 것으로 봐요.'],['주택임대차보호법 제3조의3 (임차권등기명령)','보증금을 못 받았을 때 법원에 신청하면 이사 가도 보호받을 수 있어요.']]},
+  {cat:'계약 조건 확인',tag:'중도 해지',q:'계약 기간 중에 나가야 하면 어떤 조건이 붙나요?',
+   why:'학기·휴학 일정 때문에 중간에 나갈 일이 많아서 중개보수·위약 조건을 미리 알아 둬야 해요.',
+   res:{ok:['조건을 분명히 들은 경우','몇 달 전에 알리면 되는지, 중개보수는 누가 내는지 분명하다면 좋아요. 이 내용을 특약에 적어 두세요.'],
+        unsure:['조건이 애매한 경우','"그때 상황 봐서" 같은 답은 나중에 다툼이 되기 쉬워요. 알리는 기간과 비용을 숫자로 정해 달라고 하세요.'],
+        bad:['중간에 못 나가거나 부담이 큰 경우','특약이 없으면 계약 기간 중에는 원칙적으로 마음대로 해지할 수 없어요. 위약금이 크거나 해지 조건이 없다면 학기 일정과 맞는지 다시 생각해 보세요.']},
+   risk:'중간에 나가면 다음 세입자를 구하는 중개보수를 세입자가 내는 경우가 많아요. 미리 정해 두세요.',
+   acts:['특약에 "중도 해지 시 ○개월 전 통보, 중개보수는 ○○ 부담" 넣기','휴학·교환학생 계획이 있다면 계약 기간을 짧게 할 수 있는지 물어보기','해지 조건에 대한 답을 문자로 남기기'],
+   laws:[['민법 제636조 (기간의 약정 있는 임대차의 해지통고)','계약서에 중간에 해지할 권리를 정해 둔 경우에만 기간 중에 해지를 알릴 수 있어요.'],['주택임대차보호법 제6조의2 (묵시적 갱신의 경우 계약의 해지)','자동으로 연장된 계약은 세입자가 언제든 해지를 알릴 수 있고, 3개월 뒤에 효력이 생겨요.']]},
+  {cat:'계약 조건 확인',tag:'시세 비교',q:'시세 대비 보증금이 비슷한가요?',
+   why:'주변 시세보다 보증금이 지나치게 높다면 깡통전세나 전세사기의 위험 신호라서 적정 시세를 꼭 알아야 해요.',
+   res:{ok:['주변 시세와 비슷한 경우','실거래가와 주변 매물을 비교해 비슷하다면 가격 면에서는 큰 위험 신호가 없어요.'],
+        unsure:['시세를 잘 모르는 경우','국토교통부 실거래가 공개시스템이나 부동산 앱에서 같은 동네, 비슷한 크기의 방 가격을 3곳 이상 비교해 보세요.'],
+        bad:['시세보다 보증금이 높은 경우','보증금이 집값에 가깝거나 넘으면 집을 팔아도 보증금을 다 돌려받지 못할 수 있어요(깡통전세). 계약을 다시 생각해 보세요.']},
+   risk:'"이 동네는 원래 이래요"라는 말만 믿지 말고 숫자로 비교하세요.',
+   acts:['국토교통부 실거래가 공개시스템에서 같은 건물·동네 가격 찾아보기','근처 다른 중개사무소 2곳 이상에 시세 물어보기','보증금과 대출을 합친 금액이 집값에 비해 너무 높지 않은지 계산해 보기'],
+   laws:[['공인중개사법 제25조 (중개대상물의 확인·설명)','중개사는 거래 예정 금액 등을 근거 자료와 함께 설명해야 해요.'],['참고 · 국토교통부 실거래가 공개시스템','실제로 거래된 가격을 누구나 무료로 찾아볼 수 있어요.']]},
+  {cat:'돈이 오가는 순간',tag:'입금 계좌 명의',q:'보증금과 월세는 집주인 본인 명의 계좌로 보내나요?',
+   why:'대리인이나 중개인 계좌로 보냈다가 집주인이 못 받았다고 하는 사례가 흔해요.',
+   res:{ok:['집주인 본인 계좌로 보내는 경우','등기부 소유자와 계좌 주인이 같다면 안전해요. 이체할 때 받는 사람 이름을 한 번 더 확인하세요.'],
+        unsure:['계좌 주인을 모르는 경우','계좌번호만 받았다면 이체하기 전에 받는 사람 이름이 집주인과 같은지 꼭 확인하세요.'],
+        bad:['다른 사람 계좌로 보내라는 경우','집주인이 아닌 사람에게 보낸 돈은 집주인이 "못 받았다"고 할 수 있어요. 집주인 명의 계좌로 바꿔 달라고 하세요.']},
+   risk:'현금으로 주는 것은 피하세요. 계좌 이체 기록이 가장 확실한 증거예요.',
+   acts:['이체 전 받는 사람 이름이 등기부 소유자와 같은지 확인하기','계약서에 입금 계좌 적어 두기','이체 확인증 저장해 두기'],
+   laws:[['민법 제114조 (대리행위의 효력)','대리 권한이 확인되지 않은 사람에게 준 돈은 집주인에게 준 것으로 인정되지 않을 수 있어요.'],['공인중개사법 제31조 (계약금등의 반환채무이행의 보장)','중개사는 거래 안전을 위해 계약금 등을 금융기관 등에 맡기도록 권할 수 있어요.']]},
+  {cat:'돈이 오가는 순간',tag:'잔금일 권리 변동',q:'잔금일까지 추가 대출을 받지 않는다는 내용을 특약에 넣어 줄 수 있나요?',
+   why:'계약한 뒤 잔금 전에 근저당을 새로 잡으면 계약 때 확인한 등기부가 의미 없어져요.',
+   res:{ok:['특약에 넣어 주기로 한 경우','특약이 있으면 약속을 어겼을 때 계약을 해제하고 손해배상을 요구할 근거가 생겨요.'],
+        unsure:['답을 미룬 경우','특약은 계약서에 적어야 효력이 있어요. 계약하기 전에 문장을 정해 달라고 하세요.'],
+        bad:['특약을 거절한 경우','거절했다면 잔금 전에 대출이 생길 수 있다는 뜻일 수 있어요. 잔금 당일 등기부를 꼭 다시 보고, 계약을 다시 생각해 보세요.']},
+   risk:'전입신고 효력은 다음 날 0시에 생겨요. 잔금 당일 잡힌 근저당이 내 보증금보다 앞설 수 있어요.',
+   acts:['특약에 "잔금일 다음 날까지 근저당 등 새 권리 설정 금지, 어기면 계약 해제와 손해배상" 넣기','잔금 직전에 등기부등본 다시 발급해 확인하기','잔금 당일 전입신고하고 확정일자 받기'],
+   laws:[['주택임대차보호법 제3조 (대항력 등)','집에 들어가 살고 전입신고를 하면 다음 날부터 다른 사람에게 권리를 주장할 수 있어요.'],['주택임대차보호법 제3조의2 (보증금의 회수)','확정일자를 갖추면 그 뒤에 생긴 권리보다 먼저 보증금을 받을 수 있어요.']]},
+  {cat:'돈이 오가는 순간',tag:'중개보수',q:'중개보수는 얼마이고, 영수증을 받을 수 있나요?',
+   why:'법으로 정한 한도가 있는 비용인데, 학생들이 확인 없이 넘어가는 경우가 많아요.',
+   res:{ok:['한도 안이고 영수증을 받는 경우','법정 한도 안의 금액이고 영수증이나 현금영수증을 받기로 했다면 괜찮아요.'],
+        unsure:['금액이나 영수증이 애매한 경우','지역 조례로 정한 요율표가 사무소에 걸려 있어요. 요율표로 금액을 직접 계산해 보세요.'],
+        bad:['한도를 넘거나 영수증을 안 주는 경우','법정 한도를 넘는 중개보수는 받을 수 없어요. 더 낸 돈은 돌려받을 수 있고, 구청에 신고할 수 있어요.']},
+   risk:'"수고비", "컨설팅비" 같은 이름으로 따로 받는 돈도 중개보수에 포함돼요.',
+   acts:['사무소에 걸린 중개보수 요율표 확인하기','보수 금액을 계약 전에 문자로 받아 두기','영수증이나 현금영수증 꼭 받기'],
+   laws:[['공인중개사법 제32조 (중개보수 등)','중개보수는 법령과 조례에서 정한 한도 안에서 받아야 해요.'],['공인중개사법 제33조 (금지행위)','한도를 넘는 돈이나 금품을 받는 것은 금지돼요.']]}
+];
+Q.forEach((q,i)=>{ q.id = 'q' + (i + 1); q.n = i + 1; });
+const BY_ID = Object.fromEntries(Q.map(q=>[q.id, q]));
+const SECTIONS = [...new Set(Q.map(q=>q.cat))];
+
+const LEVEL = {ok:['비교적 안전','괜찮음'], unsure:['확인 필요','애매'], bad:['주의','문제']};
 const TIPS = {
-  '구두로 들음':'구두 답변은 기록이 남지 않아요. 같은 내용을 문자로 다시 받아두세요.',
+  '구두로 들음':'구두 답변은 기록이 남지 않아요. 같은 내용을 문자로 다시 받아 두세요.',
   '문자·메신저':'문자·메신저 답변은 캡처해서 계약서와 함께 보관하세요.',
   '서류로 확인':'서류로 확인한 내용은 사본을 받아 보관하세요.'
 };
+const DEFAULT = {text:'', who:'공인중개사', how:'구두로 들음', level:null, done:false};
 const CK = '<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const state = {done:new Set(['q1','q2']), sel:'q3', who:'공인중개사', how:'구두로 들음'};
+const STORE = 'jipkok-answers-v1';
 const $ = id => document.getElementById(id);
 
-function renderList(){
+// 답변은 이 기기(브라우저)에만 저장
+let answers = {};
+try { answers = JSON.parse(localStorage.getItem(STORE)) || {}; } catch(e) { answers = {}; }
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(answers)); } catch(e) {} }
+const ans = id => answers[id] || (answers[id] = {...DEFAULT});
+const isDone = id => !!(answers[id] && answers[id].done);
+const nextOpen = () => (Q.find(q=>!isDone(q.id)) || {}).id || null;
+
+const state = {sel: nextOpen()};
+
+/* ---------- ① 질문 목록 ---------- */
+function buildList(){
+  $('list').innerHTML = SECTIONS.map((s,i)=>
+    '<div class="card" data-sec><div class="card-t">' + (i + 1) + '. ' + s + '<small></small></div>' +
+    Q.filter(q=>q.cat === s).map(q=>
+      '<div class="item" data-id="' + q.id + '" role="button" tabindex="0"><span class="ck"></span><div class="txt"><p class="tg"></p><p class="qt"></p></div></div>'
+    ).join('') + '</div>'
+  ).join('');
   document.querySelectorAll('.item').forEach(el=>{
-    const id = el.dataset.id, d = state.done.has(id), s = state.sel === id;
-    el.classList.toggle('done', d);
-    el.classList.toggle('cur', s);
+    const open = ()=>{ state.sel = el.dataset.id; renderList(); renderAnswer(); go('p2'); };
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
+  });
+}
+
+function renderList(){
+  const next = nextOpen();
+  document.querySelectorAll('.item').forEach(el=>{
+    const id = el.dataset.id, a = answers[id], d = isDone(id), cur = id === next;
+    el.className = 'item' + (d ? ' done lv-' + a.level : '') + (cur ? ' cur' : '');
     el.querySelector('.ck').innerHTML = d ? CK : '';
-    el.querySelector('.tg').innerHTML = Q[id].tag + (s ? '<span class="now">선택됨</span>' : '');
-    el.querySelector('.qt').textContent = Q[id].q;
+    el.querySelector('.tg').innerHTML = BY_ID[id].n + '. ' + BY_ID[id].tag +
+      (d ? '<span class="lv ' + a.level + '">' + LEVEL[a.level][1] + '</span>' : '') +
+      (cur ? '<span class="now">다음 질문</span>' : '');
+    el.querySelector('.qt').textContent = BY_ID[id].q;
   });
   document.querySelectorAll('[data-sec]').forEach(c=>{
     const items = [...c.querySelectorAll('.item')];
-    const n = items.filter(i=>state.done.has(i.dataset.id)).length;
+    const n = items.filter(i=>isDone(i.dataset.id)).length;
     c.querySelector('.card-t small').textContent = n + '/' + items.length + (n === items.length ? ' 완료' : '');
   });
-  const n = state.done.size;
-  $('meterText').textContent = n + ' / ' + TOTAL;
-  $('meterFill').style.width = (n / TOTAL * 100) + '%';
+  const n = Q.filter(q=>isDone(q.id)).length;
+  $('meterText').textContent = n + ' / ' + Q.length;
+  $('meterFill').style.width = (n / Q.length * 100) + '%';
   const btn = $('toAnswer');
-  btn.disabled = !state.sel;
-  btn.textContent = state.sel ? '답변 입력하기' : '질문을 선택하세요';
+  btn.disabled = !next;
+  btn.textContent = next ? (n ? '이어서 확인하기' : '첫 질문부터 시작하기') : '모든 질문을 확인했어요';
 }
 
+/* ---------- ② 답변 입력 ---------- */
 function renderAnswer(){
-  const q = Q[state.sel];
+  const q = BY_ID[state.sel], a = ans(state.sel);
+  $('a-num').textContent = '질문 ' + q.n + ' / ' + Q.length;
   $('a-cat').textContent = q.cat + ' · ' + q.tag;
   $('a-q').textContent = q.q;
   $('a-why').textContent = q.why;
-  $('a-ans').textContent = q.ans;
-  $('a-cnt').textContent = q.ans.length + ' / 300';
-  document.querySelectorAll('.chips').forEach(g=>{
-    g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c.textContent === state[g.dataset.group]));
+  $('a-ans').value = a.text;
+  document.querySelectorAll('#p2 .chips').forEach(g=>{
+    g.querySelectorAll('.chip').forEach(c=>{
+      const on = c.dataset.v === a[g.dataset.group];
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', on);
+    });
   });
+  updateAnswerUI();
 }
 
+function updateAnswerUI(){
+  const a = ans(state.sel), has = a.text.trim().length > 0;
+  $('a-cnt').textContent = a.text.length + ' / 300';
+  const btn = $('toResult');
+  btn.disabled = !(has && a.level);
+  btn.textContent = !has ? '답변을 적어 주세요' : !a.level ? '답변이 어땠는지 골라 주세요' : '영향 확인하기';
+}
+
+$('a-ans').addEventListener('input', e=>{
+  const a = ans(state.sel);
+  a.text = e.target.value;
+  if(!a.text.trim()) a.done = false;
+  save();
+  updateAnswerUI();
+});
+
+document.querySelectorAll('#p2 .chips').forEach(g=>{
+  g.addEventListener('click', e=>{
+    const c = e.target.closest('.chip'); if(!c) return;
+    ans(state.sel)[g.dataset.group] = c.dataset.v;
+    save();
+    g.querySelectorAll('.chip').forEach(x=>{ x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); });
+    updateAnswerUI();
+  });
+});
+
+/* ---------- ③ 영향·추천 행동 ---------- */
 function renderResult(){
-  const q = Q[state.sel];
-  $('r-meta').textContent = '입력한 답변 · ' + state.who + ' · ' + state.how;
-  $('r-ans').textContent = q.ans;
+  const q = BY_ID[state.sel], a = ans(state.sel), r = q.res[a.level];
+  $('r-meta').textContent = '입력한 답변 · ' + a.who + ' · ' + a.how;
+  $('r-ans').textContent = a.text.trim();
   const b = $('r-badge');
-  b.textContent = q.level === 'ok' ? '비교적 안전' : '확인 필요';
-  b.classList.toggle('ok', q.level === 'ok');
-  $('r-title').textContent = q.title;
-  $('r-impact').textContent = q.impact;
+  b.textContent = LEVEL[a.level][0];
+  b.className = 'badge' + (a.level === 'unsure' ? '' : ' ' + a.level);
+  $('r-title').textContent = r[0];
+  $('r-impact').textContent = r[1];
   $('r-risk').textContent = q.risk;
-  $('r-tip').textContent = TIPS[state.how];
-  $('r-acts').innerHTML = q.acts.map((a,i)=>'<div class="act"><span class="num">'+(i+1)+'</span><span>'+a+'</span></div>').join('');
-  $('r-laws').innerHTML = q.laws.map(l=>'<div class="law"><b>'+l[0]+'</b><span>'+l[1]+'</span></div>').join('');
+  $('r-tip').textContent = TIPS[a.how];
+  $('r-acts').innerHTML = q.acts.map((t,i)=>'<div class="act"><span class="num">' + (i + 1) + '</span><span>' + t + '</span></div>').join('');
+  $('r-laws').innerHTML = q.laws.map(l=>'<div class="law"><b>' + l[0] + '</b><span>' + l[1] + '</span></div>').join('');
+}
+
+/* ---------- 화면 전환 (휴대폰 뒤로 가기와 연결) ---------- */
+const VIEWS = ['p1','p2','p3'];
+let depth = 0;
+
+function show(id){
+  const k = VIEWS.indexOf(id);
+  VIEWS.forEach((v,i)=>{
+    const el = $(v);
+    el.classList.toggle('on', i === k);
+    el.classList.toggle('past', i < k);
+    el.setAttribute('aria-hidden', i !== k);
+  });
+  $(id).querySelector('.scroll').scrollTop = 0;
 }
 
 function go(id){
-  const dev = $(id);
-  dev.querySelector('.scroll').scrollTo({top:0,behavior:'smooth'});
-  dev.scrollIntoView({behavior:'smooth',block:'center'});
-  dev.classList.add('flash');
-  setTimeout(()=>dev.classList.remove('flash'), 900);
+  depth = VIEWS.indexOf(id);
+  history.pushState({v:id, d:depth}, '');
+  show(id);
 }
 
+window.addEventListener('popstate', e=>{
+  let v = (e.state && e.state.v) || 'p1';
+  if(v !== 'p1' && !state.sel) v = 'p1';
+  if(v === 'p3' && !(ans(state.sel).level && ans(state.sel).text.trim())) v = 'p2';
+  depth = VIEWS.indexOf(v);
+  if(v === 'p1') renderList();
+  if(v === 'p2') renderAnswer();
+  if(v === 'p3') renderResult();
+  show(v);
+});
+
+document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click', ()=>history.back()));
+
 function toast(msg){
-  const t = $('toast1');
+  const t = $('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._h);
-  t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+  t._h = setTimeout(()=>t.classList.remove('show'), 2400);
 }
 
-document.querySelectorAll('.item').forEach(el=>{
-  const pick = ()=>{ state.sel = el.dataset.id; renderList(); };
-  el.addEventListener('click', pick);
-  el.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(); } });
-});
-
-document.querySelectorAll('.chips').forEach(g=>{
-  g.addEventListener('click', e=>{
-    const c = e.target.closest('.chip'); if(!c) return;
-    state[g.dataset.group] = c.textContent;
-    g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x === c));
-  });
-});
-
-document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click', ()=>go(b.dataset.go)));
-
 $('toAnswer').addEventListener('click', ()=>{
+  state.sel = nextOpen();
   if(!state.sel) return;
   renderAnswer();
   go('p2');
@@ -441,19 +573,28 @@ $('toResult').addEventListener('click', ()=>{
 });
 
 $('toList').addEventListener('click', ()=>{
-  if(!state.sel) return;
-  const finished = Q[state.sel].tag;
-  state.done.add(state.sel);
-  state.sel = ORDER.find(id=>!state.done.has(id)) || null;
+  const finished = BY_ID[state.sel].tag;
+  ans(state.sel).done = true;
+  save();
+  state.sel = nextOpen();
   renderList();
-  if(state.sel){ renderAnswer(); renderResult(); }
-  go('p1');
-  toast(state.sel ? '"' + finished + '" 확인 완료! 다음 질문을 골라 두었어요.' : '보여드린 질문을 모두 확인했어요.');
+  if(depth > 0) history.go(-depth); else show('p1');
+  toast(state.sel ? '"' + finished + '" 확인 완료! 다음 질문을 골라 두었어요.' : '15개 질문을 모두 확인했어요. 수고했어요!');
 });
 
+$('reset').addEventListener('click', ()=>{
+  if(!confirm('적어 둔 답변을 모두 지우고 처음부터 다시 할까요?')) return;
+  answers = {};
+  save();
+  state.sel = nextOpen();
+  renderList();
+  toast('모든 답변을 지웠어요.');
+});
+
+history.replaceState({v:'p1', d:0}, '');
+buildList();
 renderList();
-renderAnswer();
-renderResult();
+show('p1');
 </script>
 </body>
 </html>
