@@ -182,6 +182,12 @@
   #p3 .scroll{padding-bottom:168px}
 
   .toast{position:absolute;left:50%;bottom:116px;z-index:6;width:max-content;max-width:calc(100% - 48px);transform:translate(-50%,8px);background:rgba(11,36,71,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);color:#fff;font-size:14.5px;font-weight:600;border-radius:16px;padding:11px 18px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+  .resume{position:absolute;inset:0;z-index:8;background:rgba(11,36,71,.38);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+  .resume[hidden]{display:none}
+  .resume-card{width:100%;background:var(--card);border-radius:22px;padding:24px 20px 14px;box-shadow:var(--shadow);text-align:center;display:grid;gap:6px}
+  .resume-t{font-size:19px;font-weight:800;color:var(--navy)}
+  .resume-d{font-size:16px;color:var(--label2);margin-bottom:10px}
+  .resume-d b{color:var(--navy)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
   footer{text-align:center;font-size:13px;color:var(--label2);padding:20px 0 0}
@@ -315,6 +321,15 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <!-- 다시 들어왔을 때 이어서 할지 묻는 창 -->
+    <div class="resume" id="resume" role="dialog" aria-modal="true" aria-labelledby="resumeTitle" hidden>
+      <div class="resume-card">
+        <p class="resume-t" id="resumeTitle">이전에 확인하던 기록이 있어요</p>
+        <p class="resume-d"><b id="resumeCount">0 / 15</b> 확인했어요. 이어서 할까요?</p>
+        <button type="button" class="btn" id="resumeYes">이어서 하기</button>
+        <button type="button" class="btn plain" id="resumeNo">새로 시작하기</button>
+      </div>
+    </div>
   </div></div>
 
   <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-15</small></footer>
@@ -933,16 +948,34 @@ $('toList').addEventListener('click', ()=>{
   toast(state.sel ? '"' + tag + '" 확인 완료! 원하는 질문을 골라 보세요.' : '15개 질문을 모두 확인했어요. 수고했어요!');
 });
 
-$('reset').addEventListener('click', ()=>{
-  if(!confirm('적어 둔 답변을 모두 지우고 처음부터 다시 할까요?')) return;
+function clearAll(){
   answers = {}; ctx = {};
   save();
   state.sel = nextOpen();
   renderList();
   toast('모든 답변을 지웠어요.');
+}
+
+$('reset').addEventListener('click', ()=>{
+  if(!confirm('적어 둔 답변을 모두 지우고 처음부터 다시 할까요?')) return;
+  clearAll();
 });
 
+// 저장된 답이 하나라도 있으면, 사이트를 열 때 이어서 할지 먼저 물어요
+function hasSaved(){
+  return Object.values(ctx).some(v=>v != null) ||
+    Object.values(answers).some(a=>a && (a.done || Object.keys(a.f || {}).length || (a.memo || '').trim()));
+}
+function closeResume(){ $('resume').hidden = true; }
+$('resumeYes').addEventListener('click', closeResume);
+$('resumeNo').addEventListener('click', ()=>{ clearAll(); closeResume(); });
+
 history.replaceState({v:'p1', d:0}, '');
+if(hasSaved()){
+  $('resumeCount').textContent = Q.filter(q=>isDone(q.id)).length + ' / ' + Q.length;
+  $('resume').hidden = false;
+  setTimeout(()=>$('resumeYes').focus(), 0);
+}
 buildList();
 renderList();
 show('p1');
