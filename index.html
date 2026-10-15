@@ -390,10 +390,10 @@ function money(){ // 5번·6번 답을 합쳐서 계산에 쓸 숫자
 function feeCap(deposit, rent, officetel){
   let base = deposit + rent * 100;
   if(base < 5000) base = deposit + rent * 70;
-  if(officetel) return {base, rate:0.004, cap: Math.round(base * 0.004 * 10) / 10};
-  const t = base < 5000 ? [0.005, 20] : base < 10000 ? [0.004, 30] : base < 60000 ? [0.003] : base < 120000 ? [0.004] : base < 150000 ? [0.005] : [0.006];
-  const cap = base * t[0];
-  return {base, rate:t[0], cap: Math.round((t[1] != null ? Math.min(cap, t[1]) : cap) * 10) / 10}; // 천 원 단위
+  const t = officetel ? [0.004] : base < 5000 ? [0.005, 20] : base < 10000 ? [0.004, 30] : base < 60000 ? [0.003] : base < 120000 ? [0.004] : base < 150000 ? [0.005] : [0.006];
+  const raw = base * t[0];
+  const cap = Math.round((t[1] != null ? Math.min(raw, t[1]) : raw) * 10) / 10; // 천 원 단위
+  return {base, rate:t[0], cap, vat: Math.round(cap * 1.1 * 10) / 10}; // vat: 부가세 10% 포함 한도
 }
 
 /* ---------- 질문 데이터 ----------
@@ -663,13 +663,13 @@ const Q = [
      else {
        const officetel = fv('q9').use === 'officetel';
        const c = feeCap(dep, rent, officetel);
-       const info = '거래금액 ' + won(c.base) + ' 기준 한도는 ' + won(c.cap) + '(요율 ' + (c.rate * 100).toFixed(1) + '%' + (officetel ? ', 주거용 오피스텔' : '') + ')이에요.';
+       const info = '거래금액 ' + won(c.base) + ' 기준 한도는 ' + won(c.cap) + '(요율 ' + (c.rate * 100).toFixed(1) + '%' + (officetel ? ', 주거용 오피스텔' : '') + '), 부가세 10%를 포함하면 ' + won(c.vat) + '이에요.';
        const basis = officetel
          ? ['info','9번에서 오피스텔을 골라 주거용 오피스텔 기준(거래금액의 0.4% 이내, 한도 없음)으로 계산했어요. 전용 85㎡ 이하이고 부엌·화장실·목욕 시설을 갖춘 오피스텔에 해당해요.']
          : ['info', fv('q9').use ? '주택 기준 요율로 계산했어요.' : '주택 기준 요율로 계산했어요. 오피스텔이라면 9번에서 고르면 오피스텔 기준(0.4% 이내, 한도 없음)으로 계산해요.'];
        if(fee <= c.cap) r.push(['ok', info + ' 중개보수 ' + won(fee) + '은 한도 안이에요.']);
-       else if(fee <= Math.round(c.cap * 1.1)) r.push(['unsure', info + ' 부가세 10%를 더하면 한도 안일 수 있어요. 중개사무소가 일반과세자인지 홈택스에서 확인하세요(간이과세자는 부가세를 따로 받을 수 없어요).']);
-       else r.push(['bad', info + ' 중개보수 ' + won(fee) + '은 한도를 넘어요. 넘는 금액은 받을 수 없고 구청에 신고할 수 있어요.']);
+       else if(fee <= c.vat) r.push(['ok', info + ' 중개보수 ' + won(fee) + '은 부가세 10%를 포함한 금액으로 보면 한도 안이라 괜찮아요.']);
+       else r.push(['bad', info + ' 중개보수 ' + won(fee) + '은 부가세 10%를 더해도 한도를 넘어요. 넘는 금액은 받을 수 없고 구청에 신고할 수 있어요.']);
        r.push(basis);
      }
      r.push({yes:['ok','영수증을 받기로 했어요.'],
