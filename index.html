@@ -23,14 +23,11 @@
   body{background:#eceef3;color:var(--label);font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:17px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
   button{font:inherit;color:inherit;letter-spacing:inherit}
 
-  /* ---------- 기기 틀 (컴퓨터에서만) ---------- */
-  .stage{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px 24px}
-  .device{position:relative;width:390px;max-width:100%;height:min(844px,calc(100dvh - 110px));min-height:640px;background:#16181d;border-radius:56px;padding:10px;box-shadow:0 24px 60px -20px rgba(11,36,71,.35)}
-  .screen{position:relative;height:100%;background:var(--bg);border-radius:46px;overflow:hidden;display:flex;flex-direction:column}
-  .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:96px;height:28px;background:#000;border-radius:20px;z-index:5}
-  .status{height:48px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:6px 28px 0 34px;font-size:15px;font-weight:600;background:var(--bg)}
-  .status .icons{display:flex;gap:5px;align-items:center}
-  .status svg{display:block}
+  /* ---------- 앱 화면 (컴퓨터에서는 가운데 둥근 카드) ---------- */
+  .stage{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px 16px}
+  .device{position:relative;height:min(932px,calc(100dvh - 84px));width:min(430px,calc((100dvh - 84px) / 2.1),100%);min-height:600px;border-radius:28px;box-shadow:0 2px 6px rgba(11,36,71,.06),0 24px 60px -24px rgba(11,36,71,.28)}
+  .screen{position:relative;height:100%;background:var(--bg);border-radius:28px;overflow:hidden;display:flex;flex-direction:column}
+  .views{padding-top:6px}
 
   /* ---------- 화면 전환 ---------- */
   .views{position:relative;flex:1;min-height:0;overflow:hidden}
@@ -46,8 +43,12 @@
   .back:active{opacity:.45}
   .back svg{display:block}
 
-  .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;padding:0 var(--pad) 124px}
-  .scroll::-webkit-scrollbar{display:none}
+  .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c4c8d0 transparent;scrollbar-gutter:stable;padding:0 var(--pad) 124px}
+  /* 창 내리는 바 (스크롤 막대) */
+  .scroll::-webkit-scrollbar{width:10px}
+  .scroll::-webkit-scrollbar-track{background:transparent;margin:6px 0 96px}
+  .scroll::-webkit-scrollbar-thumb{background:#c4c8d0;border-radius:10px;border:3px solid var(--bg);min-height:48px}
+  .scroll::-webkit-scrollbar-thumb:hover{background:#9ca1ab}
 
   /* ---------- 큰 제목 ---------- */
   .large{padding:6px 2px 4px}
@@ -170,7 +171,6 @@
   .btn.plain{background:transparent;color:var(--primary);height:46px;font-weight:600;box-shadow:none}
   .btn.plain:active{background:var(--primary-soft)}
   #p3 .scroll{padding-bottom:168px}
-  .home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:5px;background:#16181d;z-index:5}
 
   .toast{position:absolute;left:50%;bottom:116px;z-index:6;width:max-content;max-width:calc(100% - 48px);transform:translate(-50%,8px);background:rgba(11,36,71,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);color:#fff;font-size:14.5px;font-weight:600;border-radius:16px;padding:11px 18px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
   .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -184,9 +184,10 @@
   @media (max-width:520px){
     body{background:var(--bg)}
     .stage{display:block;padding:0}
-    .device{width:100%;height:100vh;height:100dvh;min-height:0;border-radius:0;padding:0;box-shadow:none;background:var(--bg)}
+    .device{width:100%;height:100vh;height:100dvh;min-height:0;border-radius:0;box-shadow:none}
     .screen{border-radius:0}
-    .island,.status,.home,footer{display:none}
+    .views{padding-top:0}
+    footer{display:none}
     .nav{padding-top:env(safe-area-inset-top);height:calc(48px + env(safe-area-inset-top))}
     .cta{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   }
@@ -198,12 +199,6 @@
 <body>
 <div class="stage">
   <div class="device"><div class="screen">
-    <div class="island"></div>
-    <div class="status"><span>9:41</span><span class="icons">
-      <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#1c1c1e"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#1c1c1e"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#1c1c1e"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#1c1c1e"/></svg>
-      <svg width="25" height="12" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3.5" fill="none" stroke="#1c1c1e" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#1c1c1e"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="#1c1c1e" opacity=".4"/></svg>
-    </span></div>
-
     <div class="views">
       <!-- ① 질문 목록 -->
       <section class="view on" id="p1" aria-label="질문 목록">
@@ -225,7 +220,7 @@
             <div class="card"><button type="button" class="reset" id="reset">처음부터 다시 하기</button></div>
             <p class="foot">적은 답변은 이 기기에만 저장돼요.</p>
           </div>
-          <p class="note">기준 시점 2026년 10월 · 서울 기준<br>참고용 안내이며 법률 자문이 아니에요.</p>
+          <p class="note">기준 시점 2026년 10월 · 서울 기준<br>참고용 안내이며 법률 자문이 아니에요. 이 안내를 바탕으로 한 결정과 그 결과에 대해 집콕체크는 책임지지 않아요. 중요한 결정 전에는 변호사·법무사 같은 전문가와 상담하세요.</p>
         </div>
         <div class="cta"><button type="button" class="btn" id="toAnswer">이어서 확인하기</button></div>
       </section>
@@ -303,14 +298,13 @@
             <div class="card-t">관련 법률</div>
             <div class="card" id="r-laws"></div>
           </div>
-          <p class="note">참고용 안내이며 법률 자문이 아니에요.<br>중요한 결정 전에는 전문가와 상담하세요.</p>
+          <p class="note">참고용 안내이며 법률 자문이 아니에요. 이 안내를 바탕으로 한 결정과 그 결과에 대해 집콕체크는 책임지지 않아요. 중요한 결정 전에는 변호사·법무사 같은 전문가와 상담하세요.</p>
         </div>
         <div class="cta"><button type="button" class="btn" id="toNext">다음 추천 질문 보기</button><button type="button" class="btn plain" id="toList">체크리스트로 돌아가기</button></div>
       </section>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <div class="home"></div>
   </div></div>
 
   <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-15</small></footer>
