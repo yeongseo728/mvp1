@@ -34,6 +34,7 @@
   .view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transform:translateX(100%);visibility:hidden;transition:transform .35s cubic-bezier(.25,.8,.25,1),visibility 0s .35s}
   .view.on{transform:none;visibility:visible;transition:transform .35s cubic-bezier(.25,.8,.25,1)}
   .view.past{transform:translateX(-30%)}
+  .view:not(.on){pointer-events:none} /* 뒤에 있는 화면은 눌리지 않게 */
 
   /* ---------- 상단 ---------- */
   .nav{flex:none;height:48px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 10px;background:rgba(244,245,248,.9);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);z-index:2}
@@ -55,6 +56,8 @@
   .eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--accent-ink);letter-spacing:.02em;margin-bottom:6px}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
   .large h1{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--navy)}
+  .large .legal-top{margin-top:8px;font-size:14px;font-weight:600;color:var(--label2)}
+  .large .legal-top::before{content:"ⓘ ";color:var(--navy)}
   .large p{font-size:16px;color:var(--label2);margin-top:8px;line-height:1.6}
 
   /* ---------- 묶음 ---------- */
@@ -95,6 +98,9 @@
   .lv.ok{background:var(--ok-bg);color:var(--ok)}
   .lv.unsure{background:var(--unsure-bg);color:var(--unsure)}
   .lv.bad{background:var(--bad-bg);color:var(--bad)}
+  .lv.skip{background:var(--fill);color:var(--label2)}
+  .item.na .qt{color:var(--label3);font-weight:500}
+  .item.na .ck{border-style:dashed;border-color:#c9ccd3}
 
   .reset{display:block;width:100%;text-align:center;padding:15px 18px;border:0;background:var(--card);color:var(--bad);font-size:16px;font-weight:600;cursor:pointer}
   .reset:active{background:var(--press)}
@@ -166,7 +172,8 @@
   .ai-text{font-size:16px;line-height:1.65}
 
   /* ---------- 하단 버튼 ---------- */
-  .cta{position:absolute;left:0;right:0;bottom:0;padding:16px var(--pad) 30px;background:linear-gradient(to bottom,rgba(244,245,248,0),var(--bg) 30%);display:grid;gap:4px}
+  .cta{position:absolute;left:0;right:0;bottom:0;padding:10px var(--pad) 30px;background:linear-gradient(to bottom,rgba(244,245,248,0),var(--bg) 18%);display:grid;gap:4px;pointer-events:none}
+  .cta .btn{pointer-events:auto} /* 버튼만 눌리고, 버튼 위 투명한 띠는 아래 내용이 눌리게 */
   .btn{width:100%;height:56px;border:0;border-radius:16px;font-size:17px;font-weight:700;background:var(--primary);color:#fff;cursor:pointer;box-shadow:0 6px 16px -6px rgba(29,79,196,.55);transition:background .15s,transform .1s}
   .btn:active{background:var(--primary-press);transform:scale(.985)}
   .btn:disabled{background:#c9ccd4;box-shadow:none;cursor:not-allowed;transform:none}
@@ -210,6 +217,7 @@
             <p class="eyebrow">전월세 계약 체크리스트</p>
             <h1>집콕체크</h1>
             <p>계약 전에 물어볼 질문이에요. 들은 답을 고르면 앱이 법률 기준으로 판단해요.</p>
+            <p class="legal-top">참고용 안내예요. 법률 자문이 아니에요.</p>
           </div>
           <div class="grp">
             <div class="card meter">
@@ -246,7 +254,7 @@
           <div id="a-fields"></div>
           <div class="field">
             <label class="lbl" for="a-ans">들은 말 메모 <span class="opt-tag">선택</span></label>
-            <div class="answer"><textarea id="a-ans" maxlength="300" rows="3" placeholder="들은 말을 그대로 적어 주세요.&#10;예) 대출이 1억 정도 있는데 괜찮대요."></textarea><span class="cnt" id="a-cnt">0 / 300</span></div>
+            <div class="answer"><textarea id="a-ans" maxlength="300" rows="3" placeholder="들은 말을 그대로 적어 주세요."></textarea><span class="cnt" id="a-cnt">0 / 300</span></div>
             <p class="fh">판단에는 쓰이지 않고 기록으로 남아요. 이름·주민번호·계좌번호는 적지 마세요.</p>
           </div>
           <div class="field">
@@ -359,13 +367,15 @@ function money(){ // 5번·6번 답을 합쳐서 계산에 쓸 숫자
   return {
     price: num(ctx.price), deposit: num(ctx.deposit),
     mort: f5.has === 'none' ? 0 : f5.has === 'yes' ? num(f5.mort) : null,
-    senior: f6.type === 'single' ? 0 : (f6.type === 'multi' && f6.src === 'doc') ? num(f6.senior) : null
+    senior: ctx.bldg === 'single' ? 0 : (ctx.bldg === 'multi' && f6.src === 'doc') ? num(f6.senior) : null
   };
 }
 // 서울 주택 임대차 중개보수 상한 (공인중개사법 시행규칙 제20조, 서울시 주택중개보수 조례)
-function feeCap(deposit, rent){
+// 주거용 오피스텔(전용 85㎡ 이하 등)은 임대차 0.4% 이내, 한도 없음 (시행규칙 제20조제4항, 별표 2)
+function feeCap(deposit, rent, officetel){
   let base = deposit + rent * 100;
   if(base < 5000) base = deposit + rent * 70;
+  if(officetel) return {base, rate:0.004, cap: Math.round(base * 0.004 * 10) / 10};
   const t = base < 5000 ? [0.005, 20] : base < 10000 ? [0.004, 30] : base < 60000 ? [0.003] : base < 120000 ? [0.004] : base < 150000 ? [0.005] : [0.006];
   const cap = base * t[0];
   return {base, rate:t[0], cap: Math.round((t[1] != null ? Math.min(cap, t[1]) : cap) * 10) / 10}; // 천 원 단위
@@ -399,7 +409,8 @@ const Q = [
    why:'등기부상 소유자와 계약서의 임대인, 실제로 나온 사람이 다르면 사기일 가능성이 있어 꼭 확인해야 해요.',
    fields:[
      {k:'match',label:'세 정보를 비교해 보니 어떤가요?',opts:[['same','등기부 소유자·계약서 임대인·나온 사람이 모두 같아요'],['diff','서로 다른 부분이 있어요'],['unk','아직 직접 비교하지 않았어요']]},
-     {k:'reg',label:'등기부등본은 어떻게 봤나요?',opts:[['me','내가 직접 최근에 떼어 봤어요'],['shown','중개사가 보여 준 것만 봤어요'],['none','보지 않았어요']]}],
+     {k:'reg',label:'등기부등본은 어떻게 봤나요?',opts:[['me','내가 직접 최근에 떼어 봤어요'],['shown','중개사가 보여 준 것만 봤어요'],['none','보지 않았어요']]},
+     {k:'bldg',shared:true,label:'어떤 건물인가요?',hint:'등기부등본에서 내 호실만 따로 등기돼 있는지 보면 알 수 있어요. 한 번 고르면 6·7번 질문이 함께 써요.',opts:[['multi','다가구예요 (건물 주인 한 명, 여러 세대)'],['single','다세대·아파트·오피스텔처럼 내 호실이 따로 등기돼 있어요'],['unk','건물 종류를 몰라요']]}],
    judge(f){
      const r = [];
      if(f.match==='same') r.push(['ok','등기부 소유자, 계약서 임대인, 계약 상대방이 모두 같아요.']);
@@ -442,14 +453,14 @@ const Q = [
              none:['unsure','중개사무소 등록을 확인하지 않았어요. 국가공간정보포털 "부동산중개업 조회"로 확인하세요.'],
              fail:['bad','등록이 조회되지 않아요. 무등록 중개업자와 거래하면 사고가 나도 공제로 보상받기 어려워요.']}[f.reg]);
      r.push({owner:['ok','공인중개사 본인이 상담했어요.'],
-             assistant:['unsure','중개보조원은 현장 안내 같은 보조 업무만 할 수 있어요. 확인·설명과 계약서 서명은 개업공인중개사가 직접 해야 해요(공인중개사법 제26조).'],
+             assistant:['unsure','중개보조원은 현장 안내 같은 보조 업무만 할 수 있어요. 확인·설명서와 계약서에는 개업공인중개사가 서명·날인하고, 그 중개를 한 소속공인중개사가 있으면 함께 서명·날인해야 해요(공인중개사법 제25조제4항, 제26조제2항).'],
              unk:['unsure','상담한 사람이 자격증 주인인지 확인하세요. 중개보조원은 보조원이라는 사실을 먼저 알려야 해요.']}[f.person]);
      r.push(f.ins==='yes' ? ['ok','공제증서를 확인했어요.'] : ['unsure','공제증서를 못 봤어요. 사고 때 보상받을 수 있는지 보장 기간과 금액을 확인하세요.']);
      return r;
    },
    risk:'자격증의 사진·이름과 실제로 상담한 사람이 다르면 자격증을 빌린 것일 수 있어요.',
    acts:['국가공간정보포털 "부동산중개업 조회"로 등록 여부와 직원 직급 확인하기','공제증서의 보장 기간과 금액 확인하기','계약서에 개업공인중개사의 서명·날인이 있는지 확인하기'],
-   laws:[['공인중개사법 제17조 (중개사무소등록증 등의 게시)','중개사는 등록증·자격증 등을 사무소 안 잘 보이는 곳에 걸어 두어야 해요.'],['공인중개사법 제18조의4 (중개보조원의 고지의무)','중개보조원은 손님에게 자신이 보조원이라는 사실을 먼저 알려야 해요.'],['공인중개사법 제26조 (거래계약서의 작성 등)','거래계약서에는 개업공인중개사가 서명하고 날인해야 해요.'],['공인중개사법 제30조 (손해배상책임의 보장)','중개사는 중개 사고에 대비해 보증보험이나 공제에 가입해야 해요.']]},
+   laws:[['공인중개사법 제17조 (중개사무소등록증 등의 게시)','중개사는 등록증·자격증 등을 사무소 안 잘 보이는 곳에 걸어 두어야 해요.'],['공인중개사법 제18조의4 (중개보조원의 고지의무)','중개보조원은 손님에게 자신이 보조원이라는 사실을 먼저 알려야 해요.'],['공인중개사법 제26조 (거래계약서의 작성 등)','거래계약서에는 개업공인중개사가 서명·날인하고, 그 중개를 한 소속공인중개사가 있으면 함께 서명·날인해야 해요.'],['공인중개사법 제30조 (손해배상책임의 보장)','중개사는 중개 사고에 대비해 보증보험이나 공제에 가입해야 해요.']]},
   {cat:'권리관계 확인',tag:'근저당 확인',q:'이 집에 대출(근저당)이 있나요? 있다면 금액은 얼마인가요?',
    why:'경매로 넘어가면 대출이 보증금보다 먼저 갚아지기 때문에, 보증금을 돌려받을 수 있는지와 바로 이어져요.',
    fields:[
@@ -466,7 +477,7 @@ const Q = [
      if(f.has==='yes' && m.mort==null) r.push(['unsure','근저당이 있는데 금액을 몰라요. 채권최고액을 넣으면 돌려받을 수 있는 금액을 계산해 드려요.']);
      if(m.mort!=null && (m.mort > 0 || (m.price && m.deposit!=null))){
        r.push(...recover(m));
-       if(m.senior==null && fv('q6').type!=='single') r.push(['unsure','다가구라면 6번 질문에서 먼저 사는 세입자 보증금도 넣어야 정확히 계산돼요.']);
+       if(m.senior==null && ctx.bldg!=='single') r.push(['unsure','다가구라면 6번 질문에서 먼저 사는 세입자 보증금도 넣어야 정확히 계산돼요.']);
      }
      return r;
    },
@@ -476,14 +487,14 @@ const Q = [
   {cat:'권리관계 확인',tag:'선순위 보증금',q:'먼저 살고 있는 세입자들의 보증금 합계는 얼마인가요?',
    why:'다가구 원룸은 먼저 들어온 세입자의 보증금이 우선이라 내 순위가 밀릴 수 있어요.',
    fields:[
-     {k:'type',label:'어떤 건물인가요?',opts:[['multi','다가구예요 (건물 주인 한 명, 여러 세대)'],['single','다세대·아파트·오피스텔처럼 내 호실이 따로 등기돼 있어요'],['unk','건물 종류를 몰라요']]},
-     {k:'src',label:'먼저 사는 세입자 보증금은 어떻게 알았나요?',show:f=>f.type==='multi',opts:[['doc','확정일자 현황·전입세대 확인서로 확인했어요'],['told','집주인·중개사 말로만 들었어요'],['unk','확인하지 못했어요']]},
-     {k:'senior',type:'money',label:'먼저 사는 세입자 보증금 합계',show:f=>f.type==='multi'&&f.src==='doc'},
+     {k:'bldg',shared:true,label:'어떤 건물인가요?',hint:'등기부등본에서 내 호실만 따로 등기돼 있는지 보면 알 수 있어요. 2번 질문과 같은 칸이에요.',opts:[['multi','다가구예요 (건물 주인 한 명, 여러 세대)'],['single','다세대·아파트·오피스텔처럼 내 호실이 따로 등기돼 있어요'],['unk','건물 종류를 몰라요']]},
+     {k:'src',label:'먼저 사는 세입자 보증금은 어떻게 알았나요?',show:f=>ctx.bldg==='multi',opts:[['doc','확정일자 현황·전입세대 확인서로 확인했어요'],['told','집주인·중개사 말로만 들었어요'],['unk','확인하지 못했어요']]},
+     {k:'senior',type:'money',label:'먼저 사는 세입자 보증금 합계',show:f=>ctx.bldg==='multi'&&f.src==='doc'},
      {k:'deposit',type:'money',shared:true,label:'내 보증금'}],
    judge(f){
      const r = [], m = money();
-     if(f.type==='single') r.push(['ok','내 호실이 따로 등기된 집이라 다른 호실 세입자 보증금이 내 순위에 영향을 주지 않아요.']);
-     if(f.type==='unk') r.push(['unsure','건물 종류를 몰라요. 건축물대장이나 등기부등본으로 다가구인지 확인하세요.']);
+     if(ctx.bldg==='single') r.push(['ok','해당 없음: 내 호실이 따로 등기된 집이라 다른 호실 세입자 보증금이 내 순위에 영향을 주지 않아요.']);
+     if(ctx.bldg==='unk') r.push(['unsure','건물 종류를 몰라요. 건축물대장이나 등기부등본으로 다가구인지 확인하세요.']);
      if(f.src==='told') r.push(['unsure','"다들 소액"이라는 말은 확인된 정보가 아니에요. 집주인 동의를 받아 확정일자 현황을 확인하세요.']);
      if(f.src==='unk') r.push(['unsure','먼저 사는 세입자 보증금을 모르면 내 보증금이 안전한지 판단할 수 없어요.']);
      if(f.src==='doc'){
@@ -491,7 +502,7 @@ const Q = [
        else r.push(...recover(m));
        if(fv('q5').has==null) r.push(['unsure','5번 질문의 근저당도 함께 확인해야 정확해요.']);
      }
-     if(f.type==='multi' && f.src!=='doc' && m.deposit!=null && m.deposit <= SMALL_LIMIT)
+     if(ctx.bldg==='multi' && f.src!=='doc' && m.deposit!=null && m.deposit <= SMALL_LIMIT)
        r.push(['info','서울에서 보증금 1억 6,500만 원 이하라 소액임차인 최우선변제(5,500만 원까지, 집값의 절반까지) 대상일 수 있어요.']);
      return r;
    },
@@ -512,7 +523,7 @@ const Q = [
        const value = m.price * 0.9, ahead = m.mort + (m.senior || 0), out = [];
        if(m.deposit + ahead > value) out.push('보증금과 선순위 채권의 합(' + won(m.deposit + ahead) + ')이 주택가격의 90%(' + won(value) + ')를 넘어요');
        if(m.mort > value * 0.6) out.push('근저당(' + won(m.mort) + ')이 주택가액의 60%(' + won(value * 0.6) + ')를 넘어요');
-       if(fv('q6').type==='multi' && ahead > value * 0.8) out.push('근저당과 다른 세입자 보증금의 합(' + won(ahead) + ')이 주택가액의 80%(' + won(value * 0.8) + ')를 넘어요');
+       if(ctx.bldg==='multi' && ahead > value * 0.8) out.push('근저당과 다른 세입자 보증금의 합(' + won(ahead) + ')이 주택가액의 80%(' + won(value * 0.8) + ')를 넘어요');
        r.push(out.length ? ['unsure','HUG 기준으로 계산하면 가입이 어려울 수 있어요. ' + out.join(' / ') + '.']
                          : ['info','HUG 기준(보증금 + 선순위 채권 ≤ 주택가격 × 90%)으로 계산하면 한도 안이에요.']);
        r.push(['info','HUG는 주택가격을 공시가격 × 140% 등 정해진 순서로 정해요. 넣은 시세와 다를 수 있고, 실제 가입 여부는 보증기관 심사로 정해져요.']);
@@ -635,11 +646,16 @@ const Q = [
      const r = [], fee = num(f.fee), dep = num(ctx.deposit), rent = num(ctx.rent);
      if(fee==null || dep==null || rent==null) r.push(['unsure','중개보수, 보증금, 월세를 모두 넣으면 서울 법정 한도와 비교해 드려요.']);
      else {
-       const c = feeCap(dep, rent);
-       const info = '거래금액 ' + won(c.base) + ' 기준 한도는 ' + won(c.cap) + '(요율 ' + (c.rate * 100).toFixed(1) + '%)이에요.';
+       const officetel = fv('q9').use === 'officetel';
+       const c = feeCap(dep, rent, officetel);
+       const info = '거래금액 ' + won(c.base) + ' 기준 한도는 ' + won(c.cap) + '(요율 ' + (c.rate * 100).toFixed(1) + '%' + (officetel ? ', 주거용 오피스텔' : '') + ')이에요.';
+       const basis = officetel
+         ? ['info','9번에서 오피스텔을 골라 주거용 오피스텔 기준(거래금액의 0.4% 이내, 한도 없음)으로 계산했어요. 전용 85㎡ 이하이고 부엌·화장실·목욕 시설을 갖춘 오피스텔에 해당해요.']
+         : ['info', fv('q9').use ? '주택 기준 요율로 계산했어요.' : '주택 기준 요율로 계산했어요. 오피스텔이라면 9번에서 고르면 오피스텔 기준(0.4% 이내, 한도 없음)으로 계산해요.'];
        if(fee <= c.cap) r.push(['ok', info + ' 중개보수 ' + won(fee) + '은 한도 안이에요.']);
        else if(fee <= Math.round(c.cap * 1.1)) r.push(['unsure', info + ' 부가세 10%를 더하면 한도 안일 수 있어요. 중개사무소가 일반과세자인지 홈택스에서 확인하세요(간이과세자는 부가세를 따로 받을 수 없어요).']);
        else r.push(['bad', info + ' 중개보수 ' + won(fee) + '은 한도를 넘어요. 넘는 금액은 받을 수 없고 구청에 신고할 수 있어요.']);
+       r.push(basis);
      }
      r.push({yes:['ok','영수증을 받기로 했어요.'],
              no:['bad','중개사무소는 10만 원 이상이면 현금영수증을 꼭 발급해야 하는 업종이에요. 거절하면 국세청에 신고할 수 있어요.'],
@@ -648,7 +664,7 @@ const Q = [
    },
    risk:'"수고비", "컨설팅비" 같은 이름으로 따로 받는 돈도 중개보수에 포함돼요.',
    acts:['사무소에 걸린 중개보수 요율표 확인하기','보수 금액을 계약 전에 문자로 받아 두기','영수증이나 현금영수증 꼭 받기'],
-   laws:[['공인중개사법 제32조 (중개보수 등)','중개보수는 법령과 조례에서 정한 한도 안에서 받아야 해요.'],['공인중개사법 제33조 (금지행위)','한도를 넘는 돈이나 금품을 받는 것은 금지돼요.'],['서울특별시 주택중개보수 등에 관한 조례','임대차 거래금액 5천만 원 미만 0.5%(한도 20만 원), 1억 원 미만 0.4%(한도 30만 원), 6억 원 미만 0.3%예요.']]}
+   laws:[['공인중개사법 제32조 (중개보수 등)','중개보수는 법령과 조례에서 정한 한도 안에서 받아야 해요.'],['공인중개사법 제33조 (금지행위)','한도를 넘는 돈이나 금품을 받는 것은 금지돼요.'],['공인중개사법 시행규칙 제20조, 별표 1·2','주택 임대차는 거래금액 5천만 원 미만 0.5%(한도 20만 원), 1억 원 미만 0.4%(한도 30만 원), 6억 원 미만 0.3%예요. 주거용 오피스텔 임대차는 0.4% 이내(한도 없음)예요. 실제 요율은 이 한도 안에서 시·도 조례로 정해요.']]}
 ];
 Q.forEach((q,i)=>{ q.id = 'q' + (i + 1); q.n = i + 1; });
 const BY_ID = Object.fromEntries(Q.map(q=>[q.id, q]));
@@ -667,12 +683,17 @@ const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&
 /* ---------- 저장 (이 기기 브라우저 안에만) ---------- */
 let answers = {}, ctx = {};
 try { const d = JSON.parse(localStorage.getItem(STORE)) || {}; answers = d.answers || {}; ctx = d.ctx || {}; } catch(e) {}
+// 예전에 6번 안에서 고른 건물 종류를 함께 쓰는 칸으로 옮겨요
+if(ctx.bldg == null && answers.q6 && answers.q6.f && answers.q6.f.type){ ctx.bldg = answers.q6.f.type; delete answers.q6.f.type; }
 function save(){ try { localStorage.setItem(STORE, JSON.stringify({answers, ctx})); } catch(e) {} }
 const ans = id => answers[id] || (answers[id] = {f:{}, memo:'', who:'공인중개사', how:'구두로 들음', done:false});
 const fv = id => (answers[id] && answers[id].f) || {};
 const visible = (q, f) => q.fields.filter(x=>!x.show || x.show(f));
-const ready = id => visible(BY_ID[id], fv(id)).every(x=>x.type === 'money' || fv(id)[x.k] != null);
-const isDone = id => !!(answers[id] && answers[id].done) && ready(id);
+const val = (x, f) => x.shared ? ctx[x.k] : f[x.k];
+const ready = id => visible(BY_ID[id], fv(id)).every(x=>x.type === 'money' || val(x, fv(id)) != null);
+// 앞선 답 때문에 필요 없는 질문 (회색 '해당 없음', 확인한 개수에 셈)
+const na = id => id === 'q6' && ctx.bldg === 'single';
+const isDone = id => na(id) || (!!(answers[id] && answers[id].done) && ready(id));
 const nextOpen = skip => (Q.find(q=>q.id !== skip && !isDone(q.id)) || {}).id || null;
 
 function judge(id){
@@ -701,11 +722,12 @@ function buildList(){
 function renderList(){
   const next = nextOpen();
   document.querySelectorAll('.item').forEach(el=>{
-    const id = el.dataset.id, d = isDone(id), cur = id === next, lv = d ? judge(id).level : '';
-    el.className = 'item' + (d ? ' done lv-' + lv : '') + (cur ? ' cur' : '');
+    const id = el.dataset.id, skip = na(id), d = isDone(id) && !skip, cur = id === next, lv = d ? judge(id).level : '';
+    el.className = 'item' + (d ? ' done lv-' + lv : '') + (skip ? ' na' : '') + (cur ? ' cur' : '');
     el.querySelector('.ck').innerHTML = d ? CK : '';
     el.querySelector('.tg').innerHTML = BY_ID[id].n + '. ' + BY_ID[id].tag +
       (d ? '<span class="lv ' + lv + '">' + LEVEL[lv][1] + '</span>' : '') +
+      (skip ? '<span class="lv skip">해당 없음</span>' : '') +
       (cur ? '<span class="now">다음 질문</span>' : '');
     el.querySelector('.qt').textContent = BY_ID[id].q;
   });
@@ -730,11 +752,11 @@ function renderFields(){
     if(x.type === 'money'){
       const v = x.shared ? ctx[x.k] : f[x.k];
       return '<div class="field"><label class="lbl" for="m-' + x.k + '">' + x.label + ' <span class="opt-tag">선택</span></label>' +
-        '<div class="money"><input id="m-' + x.k + '" data-k="' + x.k + '" data-shared="' + (x.shared ? 1 : '') + '" type="text" inputmode="numeric" autocomplete="off" placeholder="예) 1000" value="' + (v == null ? '' : v) + '"><span>만 원</span></div>' +
+        '<div class="money"><input id="m-' + x.k + '" data-k="' + x.k + '" data-shared="' + (x.shared ? 1 : '') + '" type="text" inputmode="numeric" autocomplete="off" placeholder="숫자만 입력" value="' + (v == null ? '' : v) + '"><span>만 원</span></div>' +
         '<p class="money-read">' + (v == null ? '' : won(v)) + '</p>' + hint + '</div>';
     }
-    return '<div class="field"><p class="lbl">' + x.label + '</p><div class="opts" data-k="' + x.k + '">' +
-      x.opts.map(o=>'<button type="button" class="opt' + (f[x.k] === o[0] ? ' on' : '') + '" data-v="' + o[0] + '" aria-pressed="' + (f[x.k] === o[0]) + '">' + o[1] + '</button>').join('') +
+    return '<div class="field"><p class="lbl">' + x.label + '</p><div class="opts" data-k="' + x.k + '" data-shared="' + (x.shared ? 1 : '') + '">' +
+      x.opts.map(o=>'<button type="button" class="opt' + (val(x, f) === o[0] ? ' on' : '') + '" data-v="' + o[0] + '" aria-pressed="' + (val(x, f) === o[0]) + '">' + o[1] + '</button>').join('') +
       '</div>' + hint + '</div>';
   }).join('');
 }
@@ -767,7 +789,7 @@ function updateAnswerUI(){
 
 $('a-fields').addEventListener('click', e=>{
   const b = e.target.closest('.opt'); if(!b) return;
-  ans(state.sel).f[b.parentNode.dataset.k] = b.dataset.v;
+  if(b.parentNode.dataset.shared) ctx[b.parentNode.dataset.k] = b.dataset.v; else ans(state.sel).f[b.parentNode.dataset.k] = b.dataset.v;
   save();
   const sc = $('p2').querySelector('.scroll'), y = sc.scrollTop;
   renderFields();
@@ -804,8 +826,8 @@ document.querySelectorAll('#p2 .chips').forEach(g=>{
 function renderResult(){
   const q = BY_ID[state.sel], a = ans(state.sel), j = judge(state.sel), f = a.f;
   const picked = visible(q, f).map(x=>{
-    if(x.type === 'money'){ const v = x.shared ? ctx[x.k] : f[x.k]; return v == null ? null : x.label + ' ' + won(v); }
-    const o = x.opts.find(o=>o[0] === f[x.k]); return o ? o[1] : null;
+    if(x.type === 'money'){ const v = val(x, f); return v == null ? null : x.label + ' ' + won(v); }
+    const o = x.opts.find(o=>o[0] === val(x, f)); return o ? o[1] : null;
   }).filter(Boolean);
   $('r-meta').textContent = '내가 고른 답 · ' + a.who + ' · ' + a.how;
   $('r-ans').textContent = picked.join('\n') + (a.memo.trim() ? '\n\n메모: ' + a.memo.trim() : '');
@@ -828,7 +850,14 @@ function renderResult(){
 const VIEWS = ['p1','p2','p3'];
 let depth = 0;
 
+// 화면이 넘어가는 동안(0.4초) 누름을 받지 않아요. 두 번 빨리 눌러도 다음 화면이 눌리지 않게요.
+let busyUntil = 0;
+['click','keydown'].forEach(t=>document.addEventListener(t, e=>{
+  if(Date.now() < busyUntil && (t === 'click' || e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); e.stopPropagation(); }
+}, true));
+
 function show(id){
+  busyUntil = Date.now() + 400;
   const k = VIEWS.indexOf(id);
   VIEWS.forEach((v,i)=>{
     const el = $(v);
