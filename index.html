@@ -81,6 +81,8 @@
   .meter .top b{font-size:20px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
   .meter .track{height:8px;background:var(--fill);border-radius:8px;overflow:hidden}
   .meter .fill{width:0;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:8px;transition:width .5s}
+  .meter .na-note{margin-top:10px;font-size:14px;font-weight:600;color:var(--label2)}
+  .meter .na-note[hidden]{display:none}
 
   /* 질문 목록 */
   .item{position:relative;display:flex;gap:14px;align-items:flex-start;padding:16px 40px 16px 18px;cursor:pointer;background:var(--card);transition:background .12s}
@@ -263,6 +265,7 @@
             <div class="card meter">
               <div class="top"><span>확인한 질문</span><b id="meterText">0 / 15</b></div>
               <div class="track"><div class="fill" id="meterFill"></div></div>
+              <p class="na-note" id="meterNa" hidden></p>
             </div>
           </div>
           <div id="list"></div>
@@ -734,6 +737,7 @@ const ready = id => visible(BY_ID[id], fv(id)).every(x=>x.type === 'money' || va
 // 앞선 답 때문에 필요 없는 질문 (회색 '해당 없음', 확인한 개수에 셈)
 const na = id => id === 'q6' && ctx.bldg === 'single';
 const isDone = id => na(id) || (!!(answers[id] && answers[id].done) && ready(id));
+const naCount = () => Q.filter(q=>na(q.id)).length; // 확인한 개수에 들어간 "해당 없음" 질문 수
 const nextOpen = skip => (Q.find(q=>q.id !== skip && !isDone(q.id)) || {}).id || null;
 
 function judge(id){
@@ -778,6 +782,9 @@ function renderList(){
   });
   const n = Q.filter(q=>isDone(q.id)).length;
   $('meterText').textContent = n + ' / ' + Q.length;
+  const k = naCount();
+  $('meterNa').hidden = !k;
+  $('meterNa').textContent = '해당 없음 ' + k + '개 포함';
   $('meterFill').style.width = (n / Q.length * 100) + '%';
   const btn = $('toAnswer');
   btn.disabled = !next;
@@ -995,7 +1002,8 @@ function hasSaved(){
 function renderStart(){
   const saved = hasSaved();
   $('saved').hidden = !saved;
-  $('savedCount').textContent = Q.filter(q=>isDone(q.id)).length + ' / ' + Q.length;
+  const k = naCount();
+  $('savedCount').textContent = Q.filter(q=>isDone(q.id)).length + ' / ' + Q.length + (k ? ' (해당 없음 ' + k + '개 포함)' : '');
   $('startGo').textContent = saved ? '이어서 하기' : '시작하기';
   $('startNew').hidden = !saved;
 }
