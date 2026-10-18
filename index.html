@@ -188,12 +188,12 @@
   #p3 .scroll{padding-bottom:168px}
 
   .toast{position:absolute;left:50%;bottom:116px;z-index:6;width:max-content;max-width:calc(100% - 48px);transform:translate(-50%,8px);background:rgba(11,36,71,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);color:#fff;font-size:14.5px;font-weight:600;border-radius:16px;padding:11px 18px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
-  .resume{position:absolute;inset:0;z-index:8;background:rgba(11,36,71,.38);display:flex;align-items:flex-end;justify-content:center;padding:16px}
-  .resume[hidden]{display:none}
-  .resume-card{width:100%;background:var(--card);border-radius:22px;padding:24px 20px 14px;box-shadow:var(--shadow);text-align:center;display:grid;gap:6px}
-  .resume-t{font-size:19px;font-weight:800;color:var(--navy)}
-  .resume-d{font-size:16px;color:var(--label2);margin-bottom:10px}
-  .resume-d b{color:var(--navy)}
+  /* 시작 화면: 저장된 기록 안내 */
+  .saved{padding:16px 18px;text-align:center}
+  .saved[hidden]{display:none}
+  .saved-t{font-size:17px;font-weight:800;color:var(--navy)}
+  .saved-d{font-size:16px;color:var(--label2);margin-top:4px}
+  .saved-d b{color:var(--navy)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
   footer{text-align:center;font-size:13px;color:var(--label2);padding:20px 0 0}
@@ -221,9 +221,9 @@
 <div class="stage">
   <div class="device"><div class="screen">
     <div class="views">
-      <!-- ① 질문 목록 -->
-      <section class="view on" id="p1" aria-label="질문 목록">
-        <div class="nav"><span></span><span class="title"></span><span class="step-ind">1 / 3</span></div>
+      <!-- 시작 화면 -->
+      <section class="view on" id="p0" aria-label="시작 화면">
+        <div class="nav"><span></span><span class="title"></span><span></span></div>
         <div class="scroll">
           <div class="large">
             <p class="eyebrow">전월세 계약 체크리스트</p>
@@ -236,6 +236,28 @@
               <div class="intro-row"><b>고객</b><p>서울(신촌 등)에서 혼자 전월세 계약을 앞둔 대학생을 위해 만들었어요.</p></div>
               <div class="intro-row"><b>핵심 가치</b><p>확인할 질문을 체크리스트로 모아 주고, 들은 답을 고르면 법률 기준으로 영향과 다음 행동을 알려 줘요.</p></div>
             </div>
+          </div>
+          <div class="grp">
+            <div class="card saved" id="saved" hidden>
+              <p class="saved-t">이전에 확인하던 기록이 있어요</p>
+              <p class="saved-d"><b id="savedCount">0 / 15</b> 확인했어요. 이어서 할까요?</p>
+            </div>
+          </div>
+          <p class="note">기준 시점 2026년 10월 · 서울 기준<br>참고용 안내이며 법률 자문이 아니에요. 이 안내를 바탕으로 한 결정과 그 결과에 대해 집콕체크는 책임지지 않아요. 중요한 결정 전에는 변호사·법무사 같은 전문가와 상담하세요.</p>
+        </div>
+        <div class="cta">
+          <button type="button" class="btn" id="startGo">시작하기</button>
+          <button type="button" class="btn plain" id="startNew" hidden>새로 시작하기</button>
+        </div>
+      </section>
+
+      <!-- ① 질문 목록 -->
+      <section class="view" id="p1" aria-label="질문 목록">
+        <div class="nav"><button type="button" class="back" data-back aria-label="시작 화면으로"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>처음</button><span class="title"></span><span class="step-ind">1 / 3</span></div>
+        <div class="scroll">
+          <div class="large">
+            <h1>집콕체크</h1>
+            <p class="legal-top">참고용 안내예요. 법률 자문이 아니에요.</p>
           </div>
           <div class="grp">
             <div class="card meter">
@@ -333,15 +355,6 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <!-- 다시 들어왔을 때 이어서 할지 묻는 창 -->
-    <div class="resume" id="resume" role="dialog" aria-modal="true" aria-labelledby="resumeTitle" hidden>
-      <div class="resume-card">
-        <p class="resume-t" id="resumeTitle">이전에 확인하던 기록이 있어요</p>
-        <p class="resume-d"><b id="resumeCount">0 / 15</b> 확인했어요. 이어서 할까요?</p>
-        <button type="button" class="btn" id="resumeYes">이어서 하기</button>
-        <button type="button" class="btn plain" id="resumeNo">새로 시작하기</button>
-      </div>
-    </div>
   </div></div>
 
   <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-18</small></footer>
@@ -874,7 +887,7 @@ function renderResult(){
 }
 
 /* ---------- 화면 전환 (휴대폰 뒤로 가기와 연결) ---------- */
-const VIEWS = ['p1','p2','p3'];
+const VIEWS = ['p0','p1','p2','p3'];
 let depth = 0;
 
 // 화면이 넘어가는 동안(0.4초) 누름을 받지 않아요. 두 번 빨리 눌러도 다음 화면이 눌리지 않게요.
@@ -902,10 +915,11 @@ function go(id){
 }
 
 window.addEventListener('popstate', e=>{
-  let v = (e.state && e.state.v) || 'p1';
-  if(v !== 'p1' && !state.sel) v = 'p1';
+  let v = (e.state && e.state.v) || 'p0';
+  if((v === 'p2' || v === 'p3') && !state.sel) v = 'p1';
   if(v === 'p3' && !ready(state.sel)) v = 'p2';
   depth = VIEWS.indexOf(v);
+  if(v === 'p0') renderStart();
   if(v === 'p1') renderList();
   if(v === 'p2') renderAnswer();
   if(v === 'p3') renderResult();
@@ -947,7 +961,7 @@ $('toNext').addEventListener('click', ()=>{
   const tag = finish();
   state.sel = nextOpen();
   if(!state.sel) return;
-  if(depth === 2) history.back(); else { renderAnswer(); show('p2'); }
+  if(depth === 3) history.back(); else { renderAnswer(); show('p2'); }
   toast('"' + tag + '" 확인 완료! 다음 질문이에요.');
 });
 
@@ -956,7 +970,7 @@ $('toList').addEventListener('click', ()=>{
   const tag = finish();
   state.sel = nextOpen();
   renderList();
-  if(depth > 0) history.go(-depth); else show('p1');
+  if(depth > 1) history.go(1 - depth); else show('p1');
   toast(state.sel ? '"' + tag + '" 확인 완료! 원하는 질문을 골라 보세요.' : '15개 질문을 모두 확인했어요. 수고했어요!');
 });
 
@@ -973,24 +987,26 @@ $('reset').addEventListener('click', ()=>{
   clearAll();
 });
 
-// 저장된 답이 하나라도 있으면, 사이트를 열 때 이어서 할지 먼저 물어요
+// 시작 화면: 저장된 답이 있으면 "이어서 하기 / 새로 시작하기", 없으면 "시작하기"
 function hasSaved(){
   return Object.values(ctx).some(v=>v != null) ||
     Object.values(answers).some(a=>a && (a.done || Object.keys(a.f || {}).length || (a.memo || '').trim()));
 }
-function closeResume(){ $('resume').hidden = true; }
-$('resumeYes').addEventListener('click', closeResume);
-$('resumeNo').addEventListener('click', ()=>{ clearAll(); closeResume(); });
-
-history.replaceState({v:'p1', d:0}, '');
-if(hasSaved()){
-  $('resumeCount').textContent = Q.filter(q=>isDone(q.id)).length + ' / ' + Q.length;
-  $('resume').hidden = false;
-  setTimeout(()=>$('resumeYes').focus(), 0);
+function renderStart(){
+  const saved = hasSaved();
+  $('saved').hidden = !saved;
+  $('savedCount').textContent = Q.filter(q=>isDone(q.id)).length + ' / ' + Q.length;
+  $('startGo').textContent = saved ? '이어서 하기' : '시작하기';
+  $('startNew').hidden = !saved;
 }
+$('startGo').addEventListener('click', ()=>{ state.sel = nextOpen(); renderList(); go('p1'); });
+$('startNew').addEventListener('click', ()=>{ clearAll(); go('p1'); });
+
+history.replaceState({v:'p0', d:0}, '');
 buildList();
 renderList();
-show('p1');
+renderStart();
+show('p0');
 </script>
 </body>
 </html>
