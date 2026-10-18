@@ -60,6 +60,12 @@
   .large .legal-top::before{content:"ⓘ ";color:var(--navy)}
   .large p{font-size:16px;color:var(--label2);margin-top:8px;line-height:1.6}
 
+  /* 소개 세 줄 */
+  .intro-row{padding:14px 18px}
+  .intro-row + .intro-row{border-top:1px solid var(--sep)}
+  .intro-row b{display:block;font-size:14px;font-weight:800;color:var(--navy);margin-bottom:4px}
+  .intro-row p{font-size:15px;color:var(--label2);line-height:1.6}
+
   /* ---------- 묶음 ---------- */
   .grp{margin-top:26px}
   .card-t{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 4px 10px;font-size:16px;font-weight:800;color:var(--label)}
@@ -222,8 +228,14 @@
           <div class="large">
             <p class="eyebrow">전월세 계약 체크리스트</p>
             <h1>집콕체크</h1>
-            <p>계약 전에 물어볼 질문이에요. 들은 답을 고르면 앱이 법률 기준으로 판단해요.</p>
             <p class="legal-top">참고용 안내예요. 법률 자문이 아니에요.</p>
+          </div>
+          <div class="grp">
+            <div class="card intro">
+              <div class="intro-row"><b>문제</b><p>전월세 계약 전에 무엇을 물어봐야 하는지, 받은 답이 안전한지 판단하기 어려워요.</p></div>
+              <div class="intro-row"><b>고객</b><p>서울(신촌 등)에서 혼자 전월세 계약을 앞둔 대학생을 위해 만들었어요.</p></div>
+              <div class="intro-row"><b>핵심 가치</b><p>확인할 질문을 체크리스트로 모아 주고, 들은 답을 고르면 법률 기준으로 영향과 다음 행동을 알려 줘요.</p></div>
+            </div>
           </div>
           <div class="grp">
             <div class="card meter">
