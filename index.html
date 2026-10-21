@@ -353,14 +353,14 @@
           </div>
           <p class="note">참고용 안내이며 법률 자문이 아니에요. 이 안내를 바탕으로 한 결정과 그 결과에 대해 집콕체크는 책임지지 않아요. 중요한 결정 전에는 변호사·법무사 같은 전문가와 상담하세요.</p>
         </div>
-        <div class="cta"><button type="button" class="btn" id="toNext">다음 추천 질문 보기</button><button type="button" class="btn plain" id="toList">체크리스트로 돌아가기</button></div>
+        <div class="cta"><button type="button" class="btn" id="toNext">다음 추천 질문 보기</button><button type="button" class="btn plain" id="toList">답변 저장하고 체크리스트로 돌아가기</button></div>
       </section>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div></div>
 
-  <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-18</small></footer>
+  <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-21</small></footer>
 </div>
 
 <script>
@@ -410,7 +410,7 @@ function money(){ // 5번·6번 답을 합쳐서 계산에 쓸 숫자
   return {
     price: num(ctx.price), deposit: num(ctx.deposit),
     mort: f5.has === 'none' ? 0 : f5.has === 'yes' ? num(f5.mort) : null,
-    senior: ctx.bldg === 'single' ? 0 : (ctx.bldg === 'multi' && f6.src === 'doc') ? num(f6.senior) : null
+    senior: ctx.bldg === 'single' ? 0 : (ctx.bldg === 'multi' && (f6.src === 'doc' || f6.src === 'told')) ? num(f6.senior) : null
   };
 }
 // 서울 주택 임대차 중개보수 상한 (공인중개사법 시행규칙 제20조, 서울시 주택중개보수 조례)
@@ -532,7 +532,7 @@ const Q = [
    fields:[
      {k:'bldg',shared:true,label:'어떤 건물인가요?',hint:'등기부등본에서 내 호실만 따로 등기돼 있는지 보면 알 수 있어요. 2번 질문과 같은 칸이에요.',opts:[['multi','다가구예요 (건물 주인 한 명, 여러 세대)'],['single','다세대·아파트·오피스텔처럼 내 호실이 따로 등기돼 있어요'],['unk','건물 종류를 몰라요']]},
      {k:'src',label:'먼저 사는 세입자 보증금은 어떻게 알았나요?',show:f=>ctx.bldg==='multi',opts:[['doc','확정일자 현황·전입세대 확인서로 확인했어요'],['told','집주인·중개사 말로만 들었어요'],['unk','확인하지 못했어요']]},
-     {k:'senior',type:'money',label:'먼저 사는 세입자 보증금 합계',show:f=>ctx.bldg==='multi'&&f.src==='doc'},
+     {k:'senior',type:'money',label:'먼저 사는 세입자 보증금 합계',show:f=>ctx.bldg==='multi'&&(f.src==='doc'||f.src==='told')},
      {k:'deposit',type:'money',shared:true,label:'내 보증금'}],
    judge(f){
      const r = [], m = money();
@@ -540,12 +540,12 @@ const Q = [
      if(ctx.bldg==='unk') r.push(['unsure','건물 종류를 몰라요. 건축물대장이나 등기부등본으로 다가구인지 확인하세요.']);
      if(f.src==='told') r.push(['unsure','"다들 소액"이라는 말은 확인된 정보가 아니에요. 집주인 동의를 받아 확정일자 현황을 확인하세요.']);
      if(f.src==='unk') r.push(['unsure','먼저 사는 세입자 보증금을 모르면 내 보증금이 안전한지 판단할 수 없어요.']);
-     if(f.src==='doc'){
+     if(f.src==='doc' || f.src==='told'){ // 말로 들은 금액도 5번처럼 계산에 써요 (🟠는 위에서 붙어요)
        if(m.senior==null) r.push(['unsure','보증금 합계를 넣으면 돌려받을 수 있는 금액을 계산해 드려요.']);
        else r.push(...recover(m));
        if(fv('q5').has==null) r.push(['unsure','5번 질문의 근저당도 함께 확인해야 정확해요.']);
      }
-     if(ctx.bldg==='multi' && f.src!=='doc' && m.deposit!=null && m.deposit <= SMALL_LIMIT)
+     if(ctx.bldg==='multi' && m.senior==null && m.deposit!=null && m.deposit <= SMALL_LIMIT) // 계산을 못 할 때만 안내
        r.push(['info','서울에서 보증금 1억 6,500만 원 이하라 소액임차인 최우선변제(5,500만 원까지, 집값의 절반까지) 대상일 수 있어요.']);
      return r;
    },
