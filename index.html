@@ -113,6 +113,7 @@
   .reset{display:block;width:100%;text-align:center;padding:15px 18px;border:0;background:var(--card);color:var(--bad);font-size:16px;font-weight:600;cursor:pointer}
   .reset:active{background:var(--press)}
   .note{font-size:13px;color:var(--label3);text-align:center;margin:26px 12px 0;line-height:1.65}
+  .foot-m{display:none;margin-top:14px;margin-bottom:28px}
 
   /* ---------- 답변 화면 ---------- */
   .qnum{display:inline-block;font-size:13px;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border-radius:999px;padding:3px 10px;margin-bottom:10px}
@@ -211,6 +212,7 @@
     .screen{border-radius:0}
     .views{padding-top:0}
     footer{display:none}
+    .foot-m{display:block} /* 휴대폰은 시작 화면 맨 아래에 맨 아래 문구를 보여 줘요 */
     .nav{padding-top:env(safe-area-inset-top);height:calc(48px + env(safe-area-inset-top))}
     .cta{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   }
@@ -246,6 +248,7 @@
             </div>
           </div>
           <p class="note">기준 시점 2026년 10월 · 서울 기준<br>참고용 안내이며 법률 자문이 아니에요. 이 안내를 바탕으로 한 결정과 그 결과에 대해 집콕체크는 책임지지 않아요. 중요한 결정 전에는 변호사·법무사 같은 전문가와 상담하세요.</p>
+          <p class="note foot-m" id="footM"></p><!-- 휴대폰에서만 보이는 맨 아래 문구 (내용은 footer에서 복사) -->
         </div>
         <div class="cta">
           <button type="button" class="btn" id="startGo">시작하기</button>
@@ -1011,6 +1014,7 @@ $('startGo').addEventListener('click', ()=>{ state.sel = nextOpen(); renderList(
 $('startNew').addEventListener('click', ()=>{ clearAll(); go('p1'); });
 
 history.replaceState({v:'p0', d:0}, '');
+{ const f = document.querySelector('footer'); $('footM').innerHTML = f.firstChild.textContent + '<br>' + f.querySelector('small').textContent; }
 buildList();
 renderList();
 renderStart();
