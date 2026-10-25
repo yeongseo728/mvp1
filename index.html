@@ -363,7 +363,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div></div>
 
-  <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-22</small></footer>
+  <footer>서강대 스타트업 연계전공 수업 과제<small>마지막으로 고친 날 2026-10-25</small></footer>
 </div>
 
 <script>
@@ -544,11 +544,21 @@ const Q = [
      if(f.src==='told') r.push(['unsure','집주인·중개사에게 말로 들은 보증금 금액은 확인된 정보가 아니에요. 집주인 동의를 받아 확정일자 현황을 확인하세요.']);
      if(f.src==='unk') r.push(['unsure','먼저 사는 세입자 보증금을 모르면 내 보증금이 안전한지 판단할 수 없어요.']);
      if(f.src==='doc' || f.src==='told'){ // 말로 들은 금액도 5번처럼 계산에 써요 (🟠는 위에서 붙어요)
+       const f5 = fv('q5');
        if(m.senior==null) r.push(['unsure','보증금 합계를 넣으면 돌려받을 수 있는 금액을 계산해 드려요.']);
-       else r.push(...recover(m));
-       if(fv('q5').has==null) r.push(['unsure','5번 질문의 근저당도 함께 확인해야 정확해요.']);
+       // 5번 근저당 금액을 모르면 0원으로 보지 않고 계산하지 않아요
+       if(m.mort==null) r.push(['unsure',
+         f5.has==='yes' ? '5번에 근저당이 있다고 했지만 채권최고액을 넣지 않았어요. 넣으면 돌려받을 수 있는 금액을 계산해 드려요.'
+         : f5.has==='unk' ? '5번에서 근저당이 있는지 모른다고 했어요. 등기부등본 을구를 확인해야 돌려받을 수 있는 금액을 계산할 수 있어요.'
+         : '5번 질문의 근저당을 먼저 확인해야 돌려받을 수 있는 금액을 계산할 수 있어요.']);
+       if(m.senior!=null && m.mort!=null){
+         r.push(...recover(m));
+         if(f5.src==='told') r.push(['unsure', f5.has==='none'
+           ? '5번 근저당이 없다는 건 말로만 들은 내용이에요. 등기부등본 을구로 직접 확인하세요.'
+           : '5번 근저당 금액은 말로만 들은 내용이에요. 등기부등본 을구의 채권최고액으로 직접 확인하세요.']);
+       }
      }
-     if(ctx.bldg==='multi' && m.senior==null && m.deposit!=null && m.deposit <= SMALL_LIMIT) // 계산을 못 할 때만 안내
+     if(ctx.bldg==='multi' && (m.senior==null || m.mort==null) && m.deposit!=null && m.deposit <= SMALL_LIMIT) // 계산을 못 할 때만 안내
        r.push(['info','서울에서 보증금 1억 6,500만 원 이하라 소액임차인 최우선변제(5,500만 원까지, 집값의 절반까지) 대상일 수 있어요.']);
      return r;
    },
