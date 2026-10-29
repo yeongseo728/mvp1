@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F2F3F8">
+<meta name="theme-color" content="#f4f5f8">
 <title>집콕체크</title>
 <style>
   :root{
@@ -12,13 +12,13 @@
     /* 포인트: 로즈 핑크 (강조에만 조금) */
     --accent:#e24c7f; --accent-ink:#c2335f; --accent-soft:#fdeef3;
     /* 중립: 화이트 · 라이트 그레이 · 흑백 (글자는 진하게) */
-    --bg:#F2F3F8; --card:#fff; --label:#111318; --label2:#464a53; --label3:#767b85;
+    --bg:#f4f5f8; --card:#fff; --label:#111318; --label2:#464a53; --label3:#767b85;
     --sep:#e9eaee; --fill:#e6e8ee; --press:#f1f2f6;
     /* 판단 색 */
     --ok:#1e7d45; --ok-bg:#e7f5ec; --unsure:#b35c00; --unsure-bg:#fdf1e3; --bad:#c62f2b; --bad-bg:#fcebea;
     --radius:18px; --pad:18px;
     --shadow:0 1px 2px rgba(11,36,71,.04),0 6px 20px rgba(11,36,71,.05);
-    /* DESIGN.md 견본 색과 모양 (지금은 질문 목록 화면과 여러 화면이 같이 쓰는 모양에만 써요) */
+    /* DESIGN.md 견본 색과 모양 (지금은 질문 목록 화면에만 써요) */
     --ds-primary:#0078FF; --ds-primary-strong:#0069FF; --ds-primary-heavy:#0052E0; --ds-blue-50:#EBF5FF;
     --ds-text-strong:#141A24; --ds-text-primary:#354153; --ds-text-secondary:#697383; --ds-gray-700:#4A5667;
     --ds-gray-100:#F2F3F8; --ds-gray-200:#E5E8EF; --ds-gray-300:#CBD1DC; --ds-gray-400:#B4BBCB; --ds-gray-500:#99A1B1; --ds-gray-600:#697383;
@@ -26,7 +26,7 @@
     --ds-radius-tag:6px; --ds-radius-btn:14px; --ds-radius-card:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--ds-gray-200);color:var(--label);font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:17px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+  body{background:#eceef3;color:var(--label);font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:17px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
   button{font:inherit;color:inherit;letter-spacing:inherit}
 
   /* ---------- 앱 화면 (컴퓨터에서는 가운데 둥근 카드) ---------- */
@@ -43,27 +43,27 @@
   .view:not(.on){pointer-events:none} /* 뒤에 있는 화면은 눌리지 않게 */
 
   /* ---------- 상단 ---------- */
-  .nav{flex:none;height:52px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 10px;background:#fff;z-index:2}
+  .nav{flex:none;height:48px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 10px;background:rgba(244,245,248,.9);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);z-index:2}
   .nav .title{font-size:17px;font-weight:700;text-align:center}
-  .nav .step-ind{justify-self:end;font-size:14px;font-weight:600;line-height:22px;color:var(--ds-gray-700);padding:2px 10px;background:var(--ds-gray-100);border-radius:999px;font-variant-numeric:tabular-nums}
-  .back{justify-self:start;display:flex;align-items:center;gap:4px;height:40px;padding:0 10px 0 4px;border:0;background:none;color:var(--ds-primary-heavy);font-size:16px;font-weight:600;line-height:24px;cursor:pointer;border-radius:4px}
-  .back:active{background:var(--ds-pressed)}
+  .nav .step-ind{justify-self:end;font-size:14px;font-weight:600;color:var(--label3);padding:3px 10px;background:var(--card);border-radius:999px;font-variant-numeric:tabular-nums}
+  .back{justify-self:start;display:flex;align-items:center;gap:4px;height:40px;padding:0 10px 0 4px;border:0;background:none;color:var(--primary);font-size:17px;font-weight:600;cursor:pointer;border-radius:10px}
+  .back:active{opacity:.45}
   .back svg{display:block}
 
-  .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--ds-gray-300) transparent;scrollbar-gutter:stable;padding:0 var(--pad) 124px}
+  .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c4c8d0 transparent;scrollbar-gutter:stable;padding:0 var(--pad) 124px}
   /* 창 내리는 바 (스크롤 막대) */
   .scroll::-webkit-scrollbar{width:10px}
   .scroll::-webkit-scrollbar-track{background:transparent;margin:6px 0 96px}
-  .scroll::-webkit-scrollbar-thumb{background:var(--ds-gray-300);border-radius:10px;border:3px solid var(--bg);min-height:48px}
-  .scroll::-webkit-scrollbar-thumb:hover{background:var(--ds-gray-500)}
+  .scroll::-webkit-scrollbar-thumb{background:#c4c8d0;border-radius:10px;border:3px solid var(--bg);min-height:48px}
+  .scroll::-webkit-scrollbar-thumb:hover{background:#9ca1ab}
 
   /* ---------- 큰 제목 ---------- */
   .large{padding:6px 2px 4px}
   .eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--accent-ink);letter-spacing:.02em;margin-bottom:6px}
   .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
-  .large h1{font-size:26px;font-weight:700;letter-spacing:0;line-height:36px;color:var(--ds-text-strong)}
-  .large .legal-top{margin-top:8px;font-size:14px;font-weight:600;line-height:22px;color:var(--ds-text-primary)}
-  .large .legal-top::before{content:"ⓘ ";color:var(--ds-text-primary)}
+  .large h1{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--navy)}
+  .large .legal-top{margin-top:8px;font-size:14px;font-weight:600;color:var(--label2)}
+  .large .legal-top::before{content:"ⓘ ";color:var(--navy)}
   .large p{font-size:16px;color:var(--label2);margin-top:8px;line-height:1.6}
 
   /* 소개 세 줄 */
@@ -74,9 +74,9 @@
 
   /* ---------- 묶음 ---------- */
   .grp{margin-top:26px}
-  .card-t{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 4px 10px;font-size:16px;font-weight:600;line-height:24px;color:var(--ds-text-strong)}
-  .card-t small{font-size:12px;font-weight:600;line-height:18px;color:var(--ds-text-secondary);background:var(--card);border-radius:999px;padding:2px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .card{background:var(--card);border-radius:var(--ds-radius-card);overflow:hidden}
+  .card-t{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 4px 10px;font-size:16px;font-weight:800;color:var(--label)}
+  .card-t small{font-size:13px;font-weight:600;color:var(--label3);background:var(--card);border-radius:999px;padding:2px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
   .card.pad{padding:18px}
   .foot{font-size:14px;color:var(--ds-gray-700);padding:10px 4px 0;line-height:22px}
 
@@ -118,7 +118,7 @@
 
   .reset{display:block;width:100%;text-align:center;padding:16px;border:0;background:var(--card);color:var(--bad);font-size:16px;font-weight:600;line-height:24px;cursor:pointer}
   .reset:active{background:var(--ds-pressed)}
-  .note{font-size:13px;color:var(--ds-gray-700);text-align:center;margin:26px 12px 0;line-height:20px}
+  .note{font-size:13px;color:var(--label3);text-align:center;margin:26px 12px 0;line-height:1.65}
   .foot-m{display:none;margin-top:14px;margin-bottom:28px}
 
   /* ---------- 답변 화면 ---------- */
@@ -187,11 +187,11 @@
   .ai-text{font-size:16px;line-height:1.65}
 
   /* ---------- 하단 버튼 ---------- */
-  .cta{position:absolute;left:0;right:0;bottom:0;padding:10px var(--pad) 30px;background:linear-gradient(to bottom,rgba(242,243,248,0),var(--bg) 18%);display:grid;gap:4px;pointer-events:none}
+  .cta{position:absolute;left:0;right:0;bottom:0;padding:10px var(--pad) 30px;background:linear-gradient(to bottom,rgba(244,245,248,0),var(--bg) 18%);display:grid;gap:4px;pointer-events:none}
   .cta .btn{pointer-events:auto} /* 버튼만 눌리고, 버튼 위 투명한 띠는 아래 내용이 눌리게 */
-  .btn{width:100%;height:56px;border:0;border-radius:var(--ds-radius-btn);font-size:16px;font-weight:600;line-height:24px;background:var(--ds-primary-strong);color:#fff;cursor:pointer;transition:background .15s,transform .1s}
-  .btn:active{background:var(--ds-primary-heavy);transform:scale(.92)}
-  .btn:disabled{background:var(--ds-gray-100);color:var(--ds-gray-700);box-shadow:none;cursor:not-allowed;transform:none}
+  .btn{width:100%;height:56px;border:0;border-radius:16px;font-size:17px;font-weight:700;background:var(--primary);color:#fff;cursor:pointer;box-shadow:0 6px 16px -6px rgba(29,79,196,.55);transition:background .15s,transform .1s}
+  .btn:active{background:var(--primary-press);transform:scale(.985)}
+  .btn:disabled{background:#c9ccd4;box-shadow:none;cursor:not-allowed;transform:none}
   .btn.plain{background:transparent;color:var(--primary);height:46px;font-weight:600;box-shadow:none}
   .btn.plain:active{background:var(--primary-soft)}
   #p3 .scroll{padding-bottom:168px}
@@ -210,6 +210,28 @@
 
   :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 
+
+  /* ---------- 질문 목록 화면: DESIGN.md 견본 모양 ---------- */
+  #p1{--bg:#F2F3F8}
+  #p1 .nav{height:52px;background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}
+  #p1 .nav .step-ind{line-height:22px;color:var(--ds-gray-700);padding:2px 10px;background:var(--ds-gray-100)}
+  #p1 .back{color:var(--ds-primary-heavy);font-size:16px;line-height:24px;border-radius:4px}
+  #p1 .back:active{opacity:1;background:var(--ds-pressed)}
+  #p1 .scroll{scrollbar-color:var(--ds-gray-300) transparent}
+  #p1 .scroll::-webkit-scrollbar-thumb{background:var(--ds-gray-300)}
+  #p1 .scroll::-webkit-scrollbar-thumb:hover{background:var(--ds-gray-500)}
+  #p1 .large h1{font-size:26px;font-weight:700;letter-spacing:0;line-height:36px;color:var(--ds-text-strong)}
+  #p1 .large .legal-top{line-height:22px;color:var(--ds-text-primary)}
+  #p1 .large .legal-top::before{color:var(--ds-text-primary)}
+  #p1 .card{border-radius:var(--ds-radius-card);box-shadow:none}
+  #p1 .card-t{font-weight:600;line-height:24px;color:var(--ds-text-strong)}
+  #p1 .card-t small{font-size:12px;line-height:18px;color:var(--ds-text-secondary)}
+  #p1 .note{color:var(--ds-gray-700);line-height:20px}
+  #p1 .cta{background:linear-gradient(to bottom,rgba(242,243,248,0),var(--bg) 18%)}
+  #p1 .btn{border-radius:var(--ds-radius-btn);font-size:16px;font-weight:600;line-height:24px;background:var(--ds-primary-strong);box-shadow:none}
+  #p1 .btn:active{background:var(--ds-primary-heavy);transform:scale(.92)}
+  #p1 .btn:disabled{background:var(--ds-gray-100);color:var(--ds-gray-700);transform:none}
+
   /* 휴대폰에서는 화면 전체를 앱으로 */
   @media (max-width:520px){
     body{background:var(--bg)}
@@ -219,7 +241,8 @@
     .views{padding-top:0}
     footer{display:none}
     .foot-m{display:block} /* 휴대폰은 시작 화면 맨 아래에 맨 아래 문구를 보여 줘요 */
-    .nav{padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top))}
+    .nav{padding-top:env(safe-area-inset-top);height:calc(48px + env(safe-area-inset-top))}
+    #p1 .nav{height:calc(52px + env(safe-area-inset-top))}
     .cta{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   }
   @media (prefers-reduced-motion:reduce){
