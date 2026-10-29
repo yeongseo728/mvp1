@@ -1005,7 +1005,7 @@ function aiWhy(code, d){
   d = d || {};
   if(code === 0) return '인터넷 연결이나 서버에 닿지 못했어요';
   if(d.error === 'no_key') return '키 설정을 찾지 못했어요 · Vercel의 GEMINI_API_KEY';
-  if(d.error === 'timeout') return 'AI가 20초 안에 답하지 않았어요';
+  if(d.error === 'timeout') return 'AI가 30초 안에 답하지 않았어요';
   if(d.error === 'ai_format') return 'AI 답의 모양이 이상했어요';
   if(d.error === 'body') return '보낸 내용에 빠진 것이 있어요';
   if(d.error === 'ai'){
@@ -1036,7 +1036,7 @@ function renderAi(step, data){
       '<b>보낼 메모</b><p class="ai-memo">' + esc(maskMemo(memo)) + '</p></div>' +
       '<div class="ai-row"><button type="button" class="ai-btn sub" data-ai="cancel">취소</button><button type="button" class="ai-btn fill" data-ai="send">보내기</button></div>';
   } else if(step === 'wait'){
-    box.innerHTML = '<p class="ai-text">AI가 메모를 읽고 있어요. 10초쯤 걸려요.</p><button type="button" class="ai-btn" disabled>살펴보는 중</button>';
+    box.innerHTML = '<p class="ai-text">AI가 메모를 읽고 있어요. 30초까지 걸릴 수 있어요.</p><button type="button" class="ai-btn" disabled>살펴보는 중</button>';
   } else if(step === 'done'){
     const li = a => '<ul class="ai-list">' + a.map(x=>'<li>' + esc(x) + '</li>').join('') + '</ul>';
     box.innerHTML = '<span class="ai-lv">AI 참고 의견 · ' + AI_LV[data.level] + '</span>' +
