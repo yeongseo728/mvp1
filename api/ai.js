@@ -1,7 +1,7 @@
 // 메모 AI로 살펴보기: 사용자가 "보내기"를 누르면 메모를 Gemini에 보내고, 참고 의견만 돌려줘요.
 // 키는 Vercel 설정의 GEMINI_API_KEY에만 있어요. 받은 메모와 결과는 어디에도 저장하지 않아요.
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const LEVELS = ['high', 'mid', 'low', 'unclear'];
 
 // 전화번호·주민등록번호·계좌번호·이메일처럼 보이는 글자를 가려요 (페이지에서도 한 번 가려서 보내요)
