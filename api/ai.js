@@ -75,7 +75,12 @@ module.exports = async (req, res) => {
       }),
       signal: ctrl.signal
     });
-    if(!r.ok) return res.status(502).json({error: 'ai', status: r.status});
+    if(!r.ok){
+      // 왜 거절했는지만 짧게 돌려줘요 (키는 넣지 않아요)
+      let why = '';
+      try { const e = (await r.json()).error || {}; why = mask(text(e.status, 40) + (e.message ? ' · ' + text(e.message, 120) : '')); } catch(e) {}
+      return res.status(502).json({error: 'ai', status: r.status, why});
+    }
     const data = await r.json();
     const raw = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
       data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
