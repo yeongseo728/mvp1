@@ -249,6 +249,56 @@
   .btn:active{background:var(--ds-primary-heavy);transform:scale(.92)}
   .btn:disabled{background:var(--ds-gray-100);color:var(--ds-gray-700);transform:none}
 
+  /* ---------- 나머지 화면도 DESIGN.md 견본으로 (2026-11-03) ---------- */
+  /* 굵기: 제목 700 / 소제목 600 / 본문 400 */
+  .intro-row b,.why b,.law b,.ai-sub,.ai-ask b{font-weight:600}
+  /* 안내 문구 앞 기호(ⓘ) 대신 작은 선 아이콘 */
+  .large .legal-top{display:flex;align-items:center;gap:6px}
+  .large .legal-top::before{content:"";flex:none;width:16px;height:16px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.6' fill='none' stroke='black' stroke-width='1.6'/%3E%3Cpath d='M8 7.2v4' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='4.9' r='1' fill='black'/%3E%3C/svg%3E") center/16px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.6' fill='none' stroke='black' stroke-width='1.6'/%3E%3Cpath d='M8 7.2v4' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='4.9' r='1' fill='black'/%3E%3C/svg%3E") center/16px no-repeat}
+  /* 지금 확인할 질문: 파란 세로 막대 없이 연한 파랑 바탕만 */
+  .item.cur::before{content:none}
+  /* 눌림: 살짝 작아지기 (글자 줄은 96%, 버튼은 92%) */
+  .item,.opt,.reset,.act{transition:background .1s cubic-bezier(.42,0,.58,1),transform .1s cubic-bezier(.42,0,.58,1)}
+  .item:active,.opt:active,.reset:active{transform:scale(.96)}
+  .opt:active{background:var(--ds-pressed)}
+  .opt + .opt{border-top-color:var(--ds-divider)}
+  .opt.on{background:var(--ds-blue-50)}
+  .opt.on::after{background-color:var(--ds-primary-strong)}
+  .btn.plain{color:var(--ds-primary-heavy)}
+  .btn.plain:active{background:var(--ds-blue-50);transform:scale(.92)}
+  /* 질문 카드 */
+  .qnum{color:var(--ds-primary-heavy);background:var(--ds-blue-50)}
+  .qbig{color:var(--ds-text-strong)}
+  .why{background:var(--ds-gray-100);border-radius:var(--ds-radius-btn)}
+  /* 금액·메모 칸: 고르면 테두리만 연한 파랑 */
+  .money,.answer{border-color:var(--ds-divider);box-shadow:none}
+  .money:focus-within,.answer:focus-within{border-color:var(--ds-primary);box-shadow:none}
+  .answer .cnt{color:var(--ds-text-secondary)}
+  /* 누가·어떻게 답했나요: 둥근 알약 버튼 */
+  .chips{background:none;padding:0;gap:8px;flex-wrap:wrap;border-radius:0}
+  .chip{flex:0 0 auto;min-height:40px;padding:8px 14px;border:1px solid var(--ds-gray-300);border-radius:50px;background:var(--card);color:var(--ds-text-primary);font-weight:500}
+  .chip:active{transform:scale(.95);background:var(--ds-pressed)}
+  .chip.on{background:var(--ds-blue-50);border-color:var(--ds-primary);color:var(--ds-primary-heavy);font-weight:600;box-shadow:none}
+  /* 판단 결과 */
+  .verdict h3{color:var(--ds-text-strong)}
+  .reasons li + li,.act + .act,.law + .law,.risk .tip{border-color:var(--ds-divider)}
+  .num{background:var(--ds-primary-strong)}
+  .law b{color:var(--ds-text-strong)}
+  .ai-btn{height:48px;border-color:var(--ds-divider);border-radius:var(--ds-radius-btn);color:var(--ds-primary-heavy)}
+  .ai-btn.fill{background:var(--ds-primary-strong)}
+  .ai-btn.fill:active{background:var(--ds-primary-heavy)}
+  .ai-btn.sub:active{background:var(--ds-gray-200)}
+  .ai-ask{background:var(--ds-gray-100);border-radius:var(--ds-radius-btn)}
+  .ai-lv{color:var(--ds-text-strong)}
+  /* 아래 버튼 자리: 흐려지는 띠 대신 바탕색 판과 위쪽 얇은 선 */
+  .cta{background:var(--bg);border-top:1px solid var(--ds-divider);padding-top:12px;pointer-events:auto} /* 판이 불투명해서 판 뒤 내용이 눌리지 않게 */
+  /* 알림 띠: 어두운 둥근 상자 */
+  .toast{background:var(--ds-text-strong);border-radius:var(--ds-radius-btn);padding:12px 16px}
+  /* 시작 화면 기록 안내 */
+  .saved-t,.saved-d b{color:var(--ds-text-strong)}
+  /* 컴퓨터: 진한 그림자 대신 얇은 선과 아주 옅은 그림자 */
+  .device{box-shadow:0 0 0 1px var(--ds-gray-300),0 2px 4px rgba(20,26,36,.06)}
+
   /* 휴대폰에서는 화면 전체를 앱으로 */
   @media (max-width:520px){
     body{background:var(--bg)}
