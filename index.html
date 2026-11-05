@@ -205,6 +205,27 @@
   .ai-list li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--ds-gray-600)}
   .ai-note{margin-top:14px;font-size:13px;line-height:20px;color:var(--label3)}
 
+  /* ---------- 중개사무소 등록 조회 ---------- */
+  #a-lookup{margin-top:26px}
+  .lk-l{display:block;font-size:14px;font-weight:600;line-height:22px;color:var(--ds-text-strong);margin:14px 0 6px}
+  .lk-in{display:block;width:100%;height:52px;border:1px solid var(--ds-divider);border-radius:var(--ds-radius-btn);background:var(--card);padding:0 16px;font:inherit;font-size:16px;color:var(--ds-text-strong);outline:0}
+  .lk-in:focus{border-color:var(--ds-primary)}
+  .lk-in::placeholder{color:var(--ds-text-secondary)}
+  select.lk-in{-webkit-appearance:none;appearance:none;padding-right:44px;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.2l4 4 4-4' stroke='%23354153' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 16px center/14px no-repeat}
+  select.lk-in.empty{color:var(--ds-text-secondary)}
+  .lk-send{margin-top:12px;padding:12px 16px;background:var(--ds-gray-100);border-radius:var(--ds-radius-btn);font-size:14px;line-height:22px;color:var(--ds-text-primary)}
+  .lk-msg{margin-top:14px;font-size:16px;font-weight:600;line-height:24px;color:var(--ds-text-strong)}
+  .lk-msg span{display:block;font-weight:400;font-size:14px;line-height:22px;color:var(--ds-text-primary);margin-top:2px}
+  .lk-res{margin-top:12px;border:1px solid var(--ds-divider);border-radius:var(--ds-radius-btn);padding:14px 16px}
+  .lk-res + .lk-res{margin-top:8px}
+  .lk-res b{display:block;font-size:16px;font-weight:600;line-height:24px;color:var(--ds-text-strong)}
+  .lk-st{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;line-height:20px;border-radius:var(--ds-radius-tag);padding:2px 8px;background:var(--ds-blue-50);color:var(--ds-primary-heavy)}
+  .lk-st.stop{background:var(--ds-gray-200);color:var(--ds-text-strong)}
+  .lk-res dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:10px;font-size:14px;line-height:22px}
+  .lk-res dt{color:var(--ds-text-primary)}
+  .lk-res dd{color:var(--ds-text-strong);font-weight:600;overflow-wrap:anywhere}
+  .lk-res .lk-say{margin-top:10px;padding-top:10px;border-top:1px solid var(--ds-divider);font-size:14px;font-weight:600;line-height:22px;color:var(--ds-text-strong)}
+
   /* ---------- 하단 버튼 ---------- */
   .cta{position:absolute;left:0;right:0;bottom:0;padding:10px var(--pad) 30px;background:linear-gradient(to bottom,rgba(244,245,248,0),var(--bg) 18%);display:grid;gap:4px;pointer-events:none}
   .cta .btn{pointer-events:auto} /* 버튼만 눌리고, 버튼 위 투명한 띠는 아래 내용이 눌리게 */
@@ -393,6 +414,7 @@
               <div class="why"><b>왜 물어봐야 하나요?</b><span id="a-why"></span></div>
             </div>
           </div>
+          <div class="grp" id="a-lookup" hidden></div>
           <div id="a-fields"></div>
           <div class="field">
             <label class="lbl" for="a-ans">들은 말 메모 <span class="opt-tag">선택</span></label>
@@ -582,7 +604,7 @@ const Q = [
    risk:'"다른 소유자는 가족이라 괜찮다"는 말만으로는 동의가 확인되지 않아요.',
    acts:['등기부등본 갑구에서 소유자 수와 지분 확인하기','계약에 오지 않은 소유자의 위임장과 인감증명서 받기','계약서에 소유자 전원의 이름 적기'],
    laws:[['민법 제265조 (공유물의 관리)','집을 빌려주는 것 같은 관리 행위는 지분의 과반수로 정해요.'],['민법 제130조 (무권대리)','동의하지 않은 소유자에게는 그 사람이 인정하지 않는 한 계약 효력이 미치지 않아요.']]},
-  {cat:'상대방 확인',tag:'중개사 정상 영업 확인',q:'사업자등록증, 중개사 자격증, 중개사무소 등록증, 공제증서 등을 확인해 공인중개사가 정상적으로 영업하는지 확인하셨나요?',
+  {cat:'상대방 확인',tag:'중개사 정상 영업 확인',lookup:true,q:'사업자등록증, 중개사 자격증, 중개사무소 등록증, 공제증서 등을 확인해 공인중개사가 정상적으로 영업하는지 확인하셨나요?',
    why:'등록하지 않은 중개업자나 빌린 자격증으로 하는 불법 중개를 피하고, 사고가 났을 때 손해배상 공제로 보장받으려면 미리 확인해야 해요.',
    fields:[
      {k:'reg',label:'중개사무소 등록을 확인했나요?',opts:[['checked','국가공간정보포털·구청에서 등록을 조회했어요'],['posted','사무소에 걸린 등록증·자격증만 봤어요'],['none','확인하지 않았어요'],['fail','조회해 보니 등록이 나오지 않아요']]},
@@ -933,6 +955,7 @@ function renderAnswer(){
     });
   });
   renderFields();
+  renderLookup();
   updateAnswerUI();
 }
 
@@ -977,6 +1000,96 @@ document.querySelectorAll('#p2 .chips').forEach(g=>{
     g.querySelectorAll('.chip').forEach(x=>{ x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); });
   });
 });
+
+/* ---------- 중개사무소 등록 조회 (4번 질문) ----------
+   사용자가 "조회하기"를 누를 때만 고른 구·등록번호·상호를 보내요. 키와 브이월드 연결은 api/broker.mjs에 있어요.
+   적은 값과 조회 결과는 저장하지 않고 화면에만 보여 줘요. 조회 결과는 판단 색을 바꾸지 않아요. */
+const GU = [['11110','종로구'],['11140','중구'],['11170','용산구'],['11200','성동구'],['11215','광진구'],['11230','동대문구'],['11260','중랑구'],['11290','성북구'],['11305','강북구'],['11320','도봉구'],['11350','노원구'],['11380','은평구'],['11410','서대문구'],['11440','마포구'],['11470','양천구'],['11500','강서구'],['11530','구로구'],['11545','금천구'],['11560','영등포구'],['11590','동작구'],['11620','관악구'],['11650','서초구'],['11680','강남구'],['11710','송파구'],['11740','강동구']];
+const ST_NAME = {'1':'영업중','2':'휴업','3':'휴업연장','8':'업무정지'};
+const lk = {gu:'', no:'', office:''}; // 이 화면을 보는 동안만 기억해요 (저장하지 않아요)
+let lkTurn = 0; // 다른 질문으로 가면 늦게 온 답은 버려요
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+function renderLookup(){
+  const box = $('a-lookup'), q = BY_ID[state.sel];
+  lkTurn++;
+  box.hidden = !q.lookup;
+  if(!q.lookup){ box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="card-t">등록 조회해 보기<small>국가공간정보포털 자료</small></div>' +
+    '<div class="card pad">' +
+      '<p class="ai-text">등록증에 적힌 등록번호나 상호로, 이 중개사무소가 지금 영업 중인지 바로 조회할 수 있어요.</p>' +
+      '<label class="lk-l" for="lk-gu">사무소가 있는 구</label>' +
+      '<select id="lk-gu" class="lk-in' + (lk.gu ? '' : ' empty') + '"><option value="">구를 골라 주세요</option>' +
+        GU.map(g=>'<option value="' + g[0] + '"' + (lk.gu === g[0] ? ' selected' : '') + '>' + g[1] + '</option>').join('') + '</select>' +
+      '<label class="lk-l" for="lk-no">등록번호</label>' +
+      '<input id="lk-no" class="lk-in" type="text" autocomplete="off" maxlength="30" placeholder="등록증에 적힌 번호" value="' + esc(lk.no) + '">' +
+      '<label class="lk-l" for="lk-of">상호 <span class="opt-tag">등록번호를 모를 때</span></label>' +
+      '<input id="lk-of" class="lk-in" type="text" autocomplete="off" maxlength="50" placeholder="간판·등록증에 적힌 이름" value="' + esc(lk.office) + '">' +
+      '<p class="lk-send">조회하기를 누르면 고른 구, 등록번호, 상호만 국가공간정보포털(브이월드)로 보내요. 조회 결과는 저장하지 않아요.</p>' +
+      '<button type="button" class="ai-btn fill" id="lk-go">조회하기</button>' +
+      '<div id="lk-out"></div>' +
+    '</div>';
+}
+
+function lkOut(step, data){
+  const out = $('lk-out'), go = $('lk-go'); if(!out) return;
+  go.disabled = step === 'wait';
+  go.textContent = step === 'wait' ? '조회하는 중…' : '조회하기';
+  const msg = (t, s) => '<p class="lk-msg">' + t + (s ? '<span>' + s + '</span>' : '') + '</p>';
+  if(step === 'wait'){ out.innerHTML = ''; return; }
+  if(step === 'need-gu'){ out.innerHTML = msg('구를 먼저 골라 주세요'); return; }
+  if(step === 'need-no'){ out.innerHTML = msg('등록번호나 상호를 적어 주세요'); return; }
+  if(step === 'fail'){ out.innerHTML = msg('조회하지 못했어요', '잠시 뒤 다시 조회하거나, 국가공간정보포털 "부동산중개업 조회"에서 직접 확인하세요.'); return; }
+  const items = data.items || [];
+  if(!items.length){
+    out.innerHTML = msg('조회되지 않아요', '등록번호와 구를 다시 확인해 주세요. 그래도 없으면 국가공간정보포털이나 구청에 물어보세요. 폐업한 사무소도 조회되지 않아요.');
+    return;
+  }
+  const now = today();
+  out.innerHTML = msg(items.length + '곳이 조회됐어요', '등록증·공제증서와 같은 사무소인지 확인하고, 아래에서 답을 골라 주세요.' +
+      (data.total > items.length ? ' 조회된 곳이 많아 ' + items.length + '곳만 보여요. 등록번호로 다시 조회해 보세요.' : '')) +
+    items.map(x=>{
+      const st = x.status || ST_NAME[x.code] || '';
+      const stop = ['2','3','8'].includes(x.code) || /휴업|정지/.test(st);
+      const open = x.code === '1' || st === '영업중';
+      const say = stop ? '지금은 중개할 수 없는 상태로 나와요. 이 사무소와 계약하지 마세요.'
+        : open && x.gEnd && x.gEnd < now ? '보증 기간이 지난 것으로 나와요. 최신 공제증서를 보여 달라고 하세요.'
+        : open ? '영업 중으로 등록돼 있어요. 등록증·공제증서와 같은지 확인하세요.'
+        : '영업 상태를 확인하지 못했어요. 국가공간정보포털에서 직접 확인하세요.';
+      const rows = [['등록번호', x.no], ['중개사', x.name], ['지역', x.gu], ['등록일', x.reg],
+        ['보증 기간', x.gBegin || x.gEnd ? (x.gBegin || '?') + ' ~ ' + (x.gEnd || '?') : ''], ['자료 기준일', x.base]].filter(r=>r[1]);
+      return '<div class="lk-res"><b>' + esc(x.office || '(상호 없음)') + '</b>' +
+        (st ? '<span class="lk-st' + (stop ? ' stop' : '') + '">' + esc(st) + '</span>' : '') +
+        '<dl>' + rows.map(r=>'<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' +
+        '<p class="lk-say">' + say + '</p></div>';
+    }).join('');
+}
+
+async function sendLookup(){
+  if(!lk.gu) return lkOut('need-gu');
+  const no = lk.no.trim(), office = lk.office.trim();
+  if(!no && !office) return lkOut('need-no');
+  const turn = lkTurn;
+  lkOut('wait');
+  let data = null, code = 0;
+  try {
+    const r = await fetch('/api/broker', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({gu: lk.gu, no, office})});
+    code = r.status;
+    try { data = await r.json(); } catch(e) {}
+  } catch(e) {}
+  if(turn !== lkTurn) return;
+  if(code === 200 && data && Array.isArray(data.items)) lkOut('done', data);
+  else lkOut('fail');
+}
+
+$('a-lookup').addEventListener('input', e=>{
+  const el = e.target;
+  if(el.id === 'lk-gu'){ lk.gu = el.value; el.classList.toggle('empty', !el.value); }
+  if(el.id === 'lk-no') lk.no = el.value;
+  if(el.id === 'lk-of') lk.office = el.value;
+});
+$('a-lookup').addEventListener('change', e=>{ if(e.target.id === 'lk-gu'){ lk.gu = e.target.value; e.target.classList.toggle('empty', !e.target.value); } });
+$('a-lookup').addEventListener('click', e=>{ if(e.target.closest('#lk-go')) sendLookup(); });
 
 /* ---------- ③ 판단 결과 ---------- */
 function renderResult(){
@@ -1155,6 +1268,7 @@ $('toList').addEventListener('click', ()=>{
 
 function clearAll(){
   answers = {}; ctx = {};
+  lk.gu = lk.no = lk.office = '';
   save();
   state.sel = nextOpen();
   renderList();
