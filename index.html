@@ -614,7 +614,7 @@ const Q = [
    fields:[
      {k:'reg',label:'중개사무소 등록을 확인했나요?',opts:[['checked','조회해 보니 영업 중이에요'],['posted','사무소에 걸린 등록증·자격증만 봤어요'],['none','확인하지 않았어요'],['fail','조회해 보니 등록이 없거나 영업 중이 아니에요']]},
      {k:'person',label:'누가 상담해 줬나요?',opts:[['owner','자격증에 나온 공인중개사 본인이에요'],['assistant','중개보조원(직원)이에요'],['unk','잘 모르겠어요']]},
-     {k:'ins',label:'공제증서(보증보험)를 봤나요?',opts:[['yes','봤어요'],['no','못 봤어요']]}],
+     {k:'ins',label:'공제증서(보증보험)를 확인했나요?',opts:[['lookup','조회해 보니 보증 기간 안이에요'],['yes','증서를 봤어요'],['no','못 봤어요']]}],
    judge(f){
      const r = [];
      r.push({checked:['ok','조회해 보니 영업 중으로 등록돼 있어요.'],
@@ -624,7 +624,7 @@ const Q = [
      r.push({owner:['ok','공인중개사 본인이 상담했어요.'],
              assistant:['unsure','중개보조원은 현장 안내 같은 보조 업무만 할 수 있어요. 확인·설명서와 계약서에는 개업공인중개사가 서명·날인하고, 그 중개를 한 소속공인중개사가 있으면 함께 서명·날인해야 해요(공인중개사법 제25조제4항, 제26조제2항).'],
              unk:['unsure','상담한 사람이 자격증 주인인지 확인하세요. 중개보조원은 보조원이라는 사실을 먼저 알려야 해요.']}[f.person]);
-     r.push(f.ins==='yes' ? ['ok','공제증서를 확인했어요.'] : ['unsure','공제증서를 못 봤어요. 사고 때 보상받을 수 있는지 보장 기간과 금액을 확인하세요.']);
+     r.push(f.ins==='lookup' ? ['ok','조회해 보니 공제(보증) 기간 안이에요. 보장 금액은 공제증서로 확인하세요.'] : f.ins==='yes' ? ['ok','공제증서를 확인했어요.'] : ['unsure','공제증서를 못 봤어요. 사고 때 보상받을 수 있는지 보장 기간과 금액을 확인하세요.']);
      return r;
    },
    risk:'자격증의 사진·이름과 실제로 상담한 사람이 다르면 자격증을 빌린 것일 수 있어요.',
@@ -1013,7 +1013,7 @@ const GU = [['11110','종로구'],['11140','중구'],['11170','용산구'],['112
 const ST_NAME = {'1':'영업중','2':'휴업','3':'휴업연장','8':'업무정지'};
 const lk = {gu:'', no:'', office:''}; // 이 화면을 보는 동안만 기억해요 (저장하지 않아요)
 let lkTurn = 0; // 다른 질문으로 가면 늦게 온 답은 버려요
-let lkData = null, lkPick = -1; // 마지막 조회 결과와 고른 사무소 (화면에만, 저장하지 않아요)
+let lkData = null, lkPick = -1, lkInsSet = false; // 마지막 조회 결과와 고른 사무소 (화면에만, 저장하지 않아요)
 const lkStop = x => ['2','3','8'].includes(x.code) || /휴업|정지/.test(x.status || '');
 const lkOpen = x => !lkStop(x) && (x.code === '1' || x.status === '영업중');
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
@@ -1077,7 +1077,7 @@ function lkOut(step, data){
         (stop || open ? '<button type="button" class="ai-btn lk-pick' + (on ? ' on' : '') + '" data-pick="' + i + '" aria-pressed="' + on + '">' + (on ? '고른 사무소' : '이 사무소예요') + '</button>' : '') +
         '</div>';
     }).join('') +
-    (lkPick >= 0 ? '<p class="lk-done">아래 "중개사무소 등록을 확인했나요?" 답을 골라 뒀어요. 다르면 바꿔 주세요.</p>' : '');
+    (lkPick >= 0 ? '<p class="lk-done">아래 ' + (lkInsSet ? '"중개사무소 등록"과 "공제증서"' : '"중개사무소 등록을 확인했나요?"') + ' 답을 골라 뒀어요. 다르면 바꿔 주세요.</p>' : '');
 }
 
 // "이 사무소예요"를 누르면 그 사무소 상태로 아래 답을 골라요 (영업중 → 영업 중이에요, 휴업·업무정지 → 영업 중이 아니에요)
@@ -1085,7 +1085,12 @@ function pickOffice(i){
   const x = (lkData && lkData.items || [])[i]; if(!x) return;
   const v = lkOpen(x) ? 'checked' : lkStop(x) ? 'fail' : null; if(!v) return;
   lkPick = i;
-  ans(state.sel).f.reg = v;
+  const f = ans(state.sel).f, now = today();
+  f.reg = v;
+  // 보증(공제) 기간으로 공제증서 칸도 골라요: 기간 안이면 lookup, 지났으면 no, 기간이 없으면 그대로
+  const ins = x.gEnd && x.gEnd < now ? 'no' : x.gBegin && x.gEnd && x.gBegin <= now && now <= x.gEnd ? 'lookup' : null;
+  lkInsSet = !!ins;
+  if(ins) f.ins = ins;
   save();
   const sc = $('p2').querySelector('.scroll'), y = sc.scrollTop;
   lkOut('picked');
