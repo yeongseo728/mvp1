@@ -36,6 +36,7 @@ function shape(o){
     code: pick(o, ['sttusSeCode']),
     status: pick(o, ['sttusSeCodeNm', 'sttusSeNm']),
     gu: pick(o, ['ldCodeNm']),
+    addr: pick(o, ['rdnmadr', 'mnnmadr']),
     reg: day(pick(o, ['registDe', 'registDt', 'regDe']) || pickRe(o, /regist|regDe/i)),
     gBegin: day(pick(o, ['estbsBeginDe', 'grntyBeginDe']) || pickRe(o, /(begin|bgn|start|strt)/i)),
     gEnd: day(pick(o, ['estbsEndDe', 'grntyEndDe']) || pickRe(o, /end(de|dt|date)?$/i, /regist/i)),
@@ -58,9 +59,12 @@ export default async function handler(req, res){
   const key = process.env.BROKER_KEY;
   if(!key){ logFail('BROKER_KEY 없음'); return res.status(500).json({error: 'no_key'}); }
 
-  // 브이월드 키에 등록한 사이트 주소를 함께 보내야 해요
+  // 브이월드 키에 등록한 사이트 주소를 함께 보내야 해요.
+  // Vercel 설정 BROKER_DOMAIN(실제 사이트 주소)이 있으면 늘 그 주소를 보내요. 미리보기 주소에서 시험할 때도 조회돼요.
+  // 없으면 지금 열린 사이트 주소를 보내요.
   const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
-  const q = new URLSearchParams({ldCode: gu, format: 'json', numOfRows: '20', pageNo: '1', key, domain: 'https://' + host});
+  const domain = String(process.env.BROKER_DOMAIN || '').trim() || 'https://' + host;
+  const q = new URLSearchParams({ldCode: gu, format: 'json', numOfRows: '20', pageNo: '1', key, domain});
   if(no) q.set('jurirno', no);
   if(office) q.set('bsnmCmpnm', office);
 

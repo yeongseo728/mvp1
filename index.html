@@ -1056,7 +1056,7 @@ function lkOut(step, data){
         : open && x.gEnd && x.gEnd < now ? '보증 기간이 지난 것으로 나와요. 최신 공제증서를 보여 달라고 하세요.'
         : open ? '영업 중으로 등록돼 있어요. 등록증·공제증서와 같은지 확인하세요.'
         : '영업 상태를 확인하지 못했어요. 국가공간정보포털에서 직접 확인하세요.';
-      const rows = [['등록번호', x.no], ['중개사', x.name], ['지역', x.gu], ['등록일', x.reg],
+      const rows = [['등록번호', x.no], ['중개사', x.name], ['주소', x.addr || x.gu], ['등록일', x.reg],
         ['보증 기간', x.gBegin || x.gEnd ? (x.gBegin || '?') + ' ~ ' + (x.gEnd || '?') : ''], ['자료 기준일', x.base]].filter(r=>r[1]);
       return '<div class="lk-res"><b>' + esc(x.office || '(상호 없음)') + '</b>' +
         (st ? '<span class="lk-st' + (stop ? ' stop' : '') + '">' + esc(st) + '</span>' : '') +

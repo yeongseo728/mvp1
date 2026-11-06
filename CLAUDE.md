@@ -145,10 +145,14 @@
 ## 중개사무소 등록 조회 (2026-11-05 사용자와 정함)
 - 4번 질문 답 화면에서 구(서울 25개 구)를 고르고 등록번호나 상호를 적은 뒤 "조회하기"를 누르면 조회해요.
 - 브이월드(국토교통부 국가공간정보센터) "부동산중개업사무소정보조회" `https://api.vworld.kr/ned/data/getEBOfficeInfo`를 써요. 보내는 값은 `ldCode`(구 코드), `jurirno`(등록번호), `bsnmCmpnm`(상호)만이고, 중개사 이름(`brkrNm`)은 보내지 않아요.
-- 결과로 상호, 등록번호, 중개사 이름, 영업 상태, 등록일, 보증 기간, 지역, 자료 기준일을 보여 줘요. 전화번호는 보여 주지 않아요.
+- 결과로 상호, 등록번호, 중개사 이름, 영업 상태, 주소(도로명주소, 없으면 지번주소나 구 이름), 등록일, 보증 기간, 자료 기준일을 보여 줘요. 전화번호는 보여 주지 않아요.
+- 응답 항목 이름(2026-11-06 브이월드 미리보기로 확인): `EDOffices.field[]` 안에 `bsnmCmpnm` 상호, `jurirno` 등록번호, `brkrNm` 중개사, `sttusSeCode`/`sttusSeCodeNm` 상태, `rdnmadr` 도로명주소, `mnnmadr` 지번주소, `registDe` 등록일, `estbsBeginDe`~`estbsEndDe` 보증 기간, `ldCodeNm` 구, `lastUpdtDt` 자료 기준일이에요.
+- 비슷한 이름의 "부동산중개업자정보조회"(`getEBBrokerInfo`)는 사람 정보라 영업 상태가 없어요. 앱은 쓰지 않아요.
 - 영업 상태 코드: 1 영업중, 2 휴업, 3 휴업연장, 8 업무정지 (국가공간정보센터 항목 정의서 AL_D171). 폐업한 사무소는 조회되지 않아요.
 - 조회 결과는 판단 색(🟢🟠🔴)을 바꾸지 않아요. 사용자가 결과를 보고 답을 직접 골라요.
-- 키는 Vercel 설정 `BROKER_KEY`에 있어요. 브이월드 키에 등록한 사이트 주소와 실제 사이트 주소가 같아야 해요(서버가 `domain`으로 요청한 사이트 주소를 보내요).
+- 키는 Vercel 설정 `BROKER_KEY`에 있어요. 브이월드 키에 등록한 서비스 URL은 Vercel 설정 `BROKER_DOMAIN`에 적어요. 서버는 늘 이 주소를 `domain`으로 보내서, 미리보기 주소에서도 조회돼요. `BROKER_DOMAIN`이 없으면 지금 열린 사이트 주소를 보내요.
+- 두 설정은 Vercel에서 Production과 Preview 모두 켜 둬요.
+- 브이월드는 해외 접속을 막는 것으로 보여요. 그래서 Vercel 함수 위치(Settings → Functions → Function Region)를 서울(icn1)로 바꿔 뒀어요(2026-11-06 사용자가 바꿈).
 
 ## 고친 뒤 확인하는 방법
 - 브라우저 자동 시험(Playwright, 미리 깔린 Chromium `/opt/pw-browsers/chromium`)으로 확인해요.
