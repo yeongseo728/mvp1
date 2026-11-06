@@ -224,6 +224,11 @@
   .lk-res dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:10px;font-size:14px;line-height:22px}
   .lk-res dt{color:var(--ds-text-primary)}
   .lk-res dd{color:var(--ds-text-strong);font-weight:600;overflow-wrap:anywhere}
+  .lk-res.on{background:var(--ds-blue-50);border-color:var(--ds-primary)}
+  .lk-pick{height:44px}
+  .lk-res.on .lk-st{background:var(--card)}
+  .lk-pick.on{background:var(--ds-primary-strong);border-color:transparent;color:#fff}
+  .lk-done{margin-top:12px;font-size:14px;font-weight:600;line-height:22px;color:var(--ds-primary-heavy)}
   .lk-res .lk-say{margin-top:10px;padding-top:10px;border-top:1px solid var(--ds-divider);font-size:14px;font-weight:600;line-height:22px;color:var(--ds-text-strong)}
 
   /* ---------- 하단 버튼 ---------- */
@@ -607,15 +612,15 @@ const Q = [
   {cat:'상대방 확인',tag:'중개사 정상 영업 확인',lookup:true,q:'사업자등록증, 중개사 자격증, 중개사무소 등록증, 공제증서 등을 확인해 공인중개사가 정상적으로 영업하는지 확인하셨나요?',
    why:'등록하지 않은 중개업자나 빌린 자격증으로 하는 불법 중개를 피하고, 사고가 났을 때 손해배상 공제로 보장받으려면 미리 확인해야 해요.',
    fields:[
-     {k:'reg',label:'중개사무소 등록을 확인했나요?',opts:[['checked','국가공간정보포털·구청에서 등록을 조회했어요'],['posted','사무소에 걸린 등록증·자격증만 봤어요'],['none','확인하지 않았어요'],['fail','조회해 보니 등록이 나오지 않아요']]},
+     {k:'reg',label:'중개사무소 등록을 확인했나요?',opts:[['checked','조회해 보니 영업 중이에요'],['posted','사무소에 걸린 등록증·자격증만 봤어요'],['none','확인하지 않았어요'],['fail','조회해 보니 등록이 없거나 영업 중이 아니에요']]},
      {k:'person',label:'누가 상담해 줬나요?',opts:[['owner','자격증에 나온 공인중개사 본인이에요'],['assistant','중개보조원(직원)이에요'],['unk','잘 모르겠어요']]},
      {k:'ins',label:'공제증서(보증보험)를 봤나요?',opts:[['yes','봤어요'],['no','못 봤어요']]}],
    judge(f){
      const r = [];
-     r.push({checked:['ok','중개사무소 등록을 조회로 확인했어요.'],
+     r.push({checked:['ok','조회해 보니 영업 중으로 등록돼 있어요.'],
              posted:['ok','사무소에 걸린 등록증·자격증을 확인했어요. 온라인 조회까지 하면 더 확실해요.'],
              none:['unsure','중개사무소 등록을 확인하지 않았어요. 국가공간정보포털 "부동산중개업 조회"로 확인하세요.'],
-             fail:['bad','등록이 조회되지 않아요. 무등록 중개업자와 거래하면 사고가 나도 공제로 보상받기 어려워요.']}[f.reg]);
+             fail:['bad','등록이 조회되지 않거나 휴업·업무정지 상태예요. 이런 사무소와 거래하면 사고가 나도 공제로 보상받기 어려워요.']}[f.reg]);
      r.push({owner:['ok','공인중개사 본인이 상담했어요.'],
              assistant:['unsure','중개보조원은 현장 안내 같은 보조 업무만 할 수 있어요. 확인·설명서와 계약서에는 개업공인중개사가 서명·날인하고, 그 중개를 한 소속공인중개사가 있으면 함께 서명·날인해야 해요(공인중개사법 제25조제4항, 제26조제2항).'],
              unk:['unsure','상담한 사람이 자격증 주인인지 확인하세요. 중개보조원은 보조원이라는 사실을 먼저 알려야 해요.']}[f.person]);
@@ -624,7 +629,7 @@ const Q = [
    },
    risk:'자격증의 사진·이름과 실제로 상담한 사람이 다르면 자격증을 빌린 것일 수 있어요.',
    acts:['국가공간정보포털 "부동산중개업 조회"로 등록 여부와 직원 직급 확인하기','공제증서의 보장 기간과 금액 확인하기','계약서에 개업공인중개사의 서명·날인이 있는지 확인하기'],
-   laws:[['공인중개사법 제17조 (중개사무소등록증 등의 게시)','중개사는 등록증·자격증 등을 사무소 안 잘 보이는 곳에 걸어 두어야 해요.'],['공인중개사법 제18조의4 (중개보조원의 고지의무)','중개보조원은 손님에게 자신이 보조원이라는 사실을 먼저 알려야 해요.'],['공인중개사법 제26조 (거래계약서의 작성 등)','거래계약서에는 개업공인중개사가 서명·날인하고, 그 중개를 한 소속공인중개사가 있으면 함께 서명·날인해야 해요.'],['공인중개사법 제30조 (손해배상책임의 보장)','중개사는 중개 사고에 대비해 보증보험이나 공제에 가입해야 해요.']]},
+   laws:[['공인중개사법 제17조 (중개사무소등록증 등의 게시)','중개사는 등록증·자격증 등을 사무소 안 잘 보이는 곳에 걸어 두어야 해요.'],['공인중개사법 제18조의4 (중개보조원의 고지의무)','중개보조원은 손님에게 자신이 보조원이라는 사실을 먼저 알려야 해요.'],['공인중개사법 제26조 (거래계약서의 작성 등)','거래계약서에는 개업공인중개사가 서명·날인하고, 그 중개를 한 소속공인중개사가 있으면 함께 서명·날인해야 해요.'],['공인중개사법 제30조 (손해배상책임의 보장)','중개사는 중개 사고에 대비해 보증보험이나 공제에 가입해야 해요.'],['공인중개사법 제21조 (휴업 또는 폐업의 신고)','3개월을 넘게 쉬거나, 쉬다가 다시 영업할 때는 등록관청(구청)에 신고해야 해요.'],['공인중개사법 제39조 (업무의 정지)','등록관청은 6개월 안에서 업무 정지를 명할 수 있어요. 정지 기간에 중개하면 등록이 취소될 수 있어요(제38조제2항제7호).']]},
   {cat:'권리관계 확인',tag:'근저당 확인',q:'이 집에 대출(근저당)이 있나요? 있다면 금액은 얼마인가요?',
    why:'경매로 넘어가면 대출이 보증금보다 먼저 갚아지기 때문에, 보증금을 돌려받을 수 있는지와 바로 이어져요.',
    fields:[
@@ -1008,12 +1013,16 @@ const GU = [['11110','종로구'],['11140','중구'],['11170','용산구'],['112
 const ST_NAME = {'1':'영업중','2':'휴업','3':'휴업연장','8':'업무정지'};
 const lk = {gu:'', no:'', office:''}; // 이 화면을 보는 동안만 기억해요 (저장하지 않아요)
 let lkTurn = 0; // 다른 질문으로 가면 늦게 온 답은 버려요
+let lkData = null, lkPick = -1; // 마지막 조회 결과와 고른 사무소 (화면에만, 저장하지 않아요)
+const lkStop = x => ['2','3','8'].includes(x.code) || /휴업|정지/.test(x.status || '');
+const lkOpen = x => !lkStop(x) && (x.code === '1' || x.status === '영업중');
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
 function renderLookup(){
   const box = $('a-lookup'), q = BY_ID[state.sel];
   lkTurn++;
   box.hidden = !q.lookup;
+  lkData = null; lkPick = -1;
   if(!q.lookup){ box.innerHTML = ''; return; }
   box.innerHTML = '<div class="card-t">등록 조회해 보기<small>국가공간정보포털 자료</small></div>' +
     '<div class="card pad">' +
@@ -1040,29 +1049,49 @@ function lkOut(step, data){
   if(step === 'need-gu'){ out.innerHTML = msg('구를 먼저 골라 주세요'); return; }
   if(step === 'need-no'){ out.innerHTML = msg('등록번호나 상호를 적어 주세요'); return; }
   if(step === 'fail'){ out.innerHTML = msg('조회하지 못했어요', '잠시 뒤 다시 조회하거나, 국가공간정보포털 "부동산중개업 조회"에서 직접 확인하세요.'); return; }
+  if(step === 'done'){ lkData = data; lkPick = -1; }
+  data = lkData;
   const items = data.items || [];
   if(!items.length){
-    out.innerHTML = msg('조회되지 않아요', '등록번호와 구를 다시 확인해 주세요. 그래도 없으면 국가공간정보포털이나 구청에 물어보세요. 폐업한 사무소도 조회되지 않아요.');
+    out.innerHTML = msg('조회되지 않아요', (data.byNo ? '등록번호와 구를 다시 확인해 주세요.' : '상호가 등록된 이름과 조금만 달라도 안 나와요. 등록증에 적힌 등록번호로 다시 조회해 보세요.') +
+      ' 그래도 없으면 국가공간정보포털이나 구청에 물어보세요. 폐업한 사무소도 조회되지 않아요.');
     return;
   }
   const now = today();
-  out.innerHTML = msg(items.length + '곳이 조회됐어요', '등록증·공제증서와 같은 사무소인지 확인하고, 아래에서 답을 골라 주세요.' +
+  out.innerHTML = msg(items.length + '곳이 조회됐어요', (items.length > 1 ? '주소와 중개사 이름을 보고 내가 간 사무소를 골라 주세요.' : '등록증·공제증서와 같은 사무소인지 확인하고 골라 주세요.') +
       (data.total > items.length ? ' 조회된 곳이 많아 ' + items.length + '곳만 보여요. 등록번호로 다시 조회해 보세요.' : '')) +
-    items.map(x=>{
+    items.map((x,i)=>{
       const st = x.status || ST_NAME[x.code] || '';
-      const stop = ['2','3','8'].includes(x.code) || /휴업|정지/.test(st);
-      const open = x.code === '1' || st === '영업중';
+      const stop = lkStop(x), open = lkOpen(x);
       const say = stop ? '지금은 중개할 수 없는 상태로 나와요. 이 사무소와 계약하지 마세요.'
         : open && x.gEnd && x.gEnd < now ? '보증 기간이 지난 것으로 나와요. 최신 공제증서를 보여 달라고 하세요.'
         : open ? '영업 중으로 등록돼 있어요. 등록증·공제증서와 같은지 확인하세요.'
         : '영업 상태를 확인하지 못했어요. 국가공간정보포털에서 직접 확인하세요.';
       const rows = [['등록번호', x.no], ['중개사', x.name], ['주소', x.addr || x.gu], ['등록일', x.reg],
         ['보증 기간', x.gBegin || x.gEnd ? (x.gBegin || '?') + ' ~ ' + (x.gEnd || '?') : ''], ['자료 기준일', x.base]].filter(r=>r[1]);
-      return '<div class="lk-res"><b>' + esc(x.office || '(상호 없음)') + '</b>' +
+      const on = i === lkPick;
+      return '<div class="lk-res' + (on ? ' on' : '') + '"><b>' + esc(x.office || '(상호 없음)') + '</b>' +
         (st ? '<span class="lk-st' + (stop ? ' stop' : '') + '">' + esc(st) + '</span>' : '') +
         '<dl>' + rows.map(r=>'<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' +
-        '<p class="lk-say">' + say + '</p></div>';
-    }).join('');
+        '<p class="lk-say">' + say + '</p>' +
+        (stop || open ? '<button type="button" class="ai-btn lk-pick' + (on ? ' on' : '') + '" data-pick="' + i + '" aria-pressed="' + on + '">' + (on ? '고른 사무소' : '이 사무소예요') + '</button>' : '') +
+        '</div>';
+    }).join('') +
+    (lkPick >= 0 ? '<p class="lk-done">아래 "중개사무소 등록을 확인했나요?" 답을 골라 뒀어요. 다르면 바꿔 주세요.</p>' : '');
+}
+
+// "이 사무소예요"를 누르면 그 사무소 상태로 아래 답을 골라요 (영업중 → 영업 중이에요, 휴업·업무정지 → 영업 중이 아니에요)
+function pickOffice(i){
+  const x = (lkData && lkData.items || [])[i]; if(!x) return;
+  const v = lkOpen(x) ? 'checked' : lkStop(x) ? 'fail' : null; if(!v) return;
+  lkPick = i;
+  ans(state.sel).f.reg = v;
+  save();
+  const sc = $('p2').querySelector('.scroll'), y = sc.scrollTop;
+  lkOut('picked');
+  renderFields();
+  sc.scrollTop = y;
+  updateAnswerUI();
 }
 
 async function sendLookup(){
@@ -1078,7 +1107,7 @@ async function sendLookup(){
     try { data = await r.json(); } catch(e) {}
   } catch(e) {}
   if(turn !== lkTurn) return;
-  if(code === 200 && data && Array.isArray(data.items)) lkOut('done', data);
+  if(code === 200 && data && Array.isArray(data.items)){ data.byNo = !!no; lkOut('done', data); }
   else lkOut('fail');
 }
 
@@ -1089,7 +1118,10 @@ $('a-lookup').addEventListener('input', e=>{
   if(el.id === 'lk-of') lk.office = el.value;
 });
 $('a-lookup').addEventListener('change', e=>{ if(e.target.id === 'lk-gu'){ lk.gu = e.target.value; e.target.classList.toggle('empty', !e.target.value); } });
-$('a-lookup').addEventListener('click', e=>{ if(e.target.closest('#lk-go')) sendLookup(); });
+$('a-lookup').addEventListener('click', e=>{
+  if(e.target.closest('#lk-go')) return sendLookup();
+  const b = e.target.closest('[data-pick]'); if(b) pickOffice(+b.dataset.pick);
+});
 
 /* ---------- ③ 판단 결과 ---------- */
 function renderResult(){
