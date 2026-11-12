@@ -935,7 +935,7 @@ function renderFields(){
     if(x.type === 'money'){
       const v = x.shared ? ctx[x.k] : f[x.k];
       return '<div class="field"><label class="lbl" for="m-' + x.k + '">' + x.label + ' <span class="opt-tag">선택</span></label>' +
-        '<div class="money"><input id="m-' + x.k + '" data-k="' + x.k + '" data-shared="' + (x.shared ? 1 : '') + '" type="text" inputmode="numeric" autocomplete="off" placeholder="숫자만 입력" value="' + (v == null ? '' : v) + '"><span>만 원</span></div>' +
+        '<div class="money"><input id="m-' + x.k + '" data-k="' + x.k + '" data-shared="' + (x.shared ? 1 : '') + '" type="text" inputmode="decimal" autocomplete="off" placeholder="숫자만 입력" value="' + (v == null ? '' : v) + '"><span>만 원</span></div>' +
         '<p class="money-read">' + (v == null ? '' : won(v)) + '</p>' + hint + '</div>';
     }
     return '<div class="field"><p class="lbl">' + x.label + '</p><div class="opts" data-k="' + x.k + '" data-shared="' + (x.shared ? 1 : '') + '">' +
@@ -983,9 +983,12 @@ $('a-fields').addEventListener('click', e=>{
 
 $('a-fields').addEventListener('input', e=>{
   const el = e.target; if(!el.dataset.k) return;
-  const clean = el.value.replace(/[^0-9]/g, '').slice(0, 7);
+  // 만 원 단위라 소수점 한 자리(천 원)까지 받아요. 예: 49.5 → 49만 5,000 원
+  const raw = el.value.replace(/[^0-9.]/g, ''), dot = raw.indexOf('.');
+  const clean = dot < 0 ? raw.slice(0, 7)
+    : raw.slice(0, dot).slice(0, 7) + '.' + raw.slice(dot + 1).replace(/\./g, '').slice(0, 1);
   if(clean !== el.value) el.value = clean;
-  const v = clean === '' ? null : +clean;
+  const v = clean === '' || clean === '.' ? null : +clean;
   if(el.dataset.shared) ctx[el.dataset.k] = v; else ans(state.sel).f[el.dataset.k] = v;
   el.closest('.field').querySelector('.money-read').textContent = v == null ? '' : won(v);
   save();
