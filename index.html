@@ -1210,7 +1210,8 @@ window.addEventListener('popstate', e=>{
 document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click', ()=>history.back()));
 
 /* ---------- 메모 AI로 살펴보기 ----------
-   사용자가 "보내기"를 누를 때만 메모(가린 것) 하나만 보내요. 지시와 답의 모양은 api/ai.mjs에 있어요.
+   사용자가 "보내기"를 누를 때만 메모(가린 것)와 그 질문 문장, 관련 법률 목록을 보내요. 고른 답·금액은 보내지 않아요.
+   지시와 답의 모양, 목록에 없는 법률 이름 지우기는 api/ai.mjs에 있어요.
    받은 AI 의견은 다른 답처럼 이 기기 브라우저에만 저장해요(2026-11-12 사용자와 정함).
    메모를 고치면 저장된 의견은 보여 주지 않고 다시 살펴보게 해요. AI 의견은 위 판단 색을 바꾸지 않아요. */
 const AI_NOTE = 'AI 의견은 틀릴 수 있어요. 위 판단과 다르면 위 판단을 먼저 따르세요. 참고용 안내이며 법률 자문이 아니에요.';
@@ -1239,7 +1240,7 @@ function renderAi(step, data){
   } else if(step === 'empty'){
     box.innerHTML = '<p class="ai-text"><b>먼저 글을 적어 주세요</b></p><p class="ai-note">답변 화면의 메모 칸에 들은 말을 적은 뒤 다시 눌러 주세요.</p>' + AI_BTN;
   } else if(step === 'ask'){
-    box.innerHTML = '<p class="ai-text">메모가 Google(Gemini)로 보내져요. 이름·전화번호·주소는 빼고 보내 주세요.</p>' +
+    box.innerHTML = '<p class="ai-text">메모가 Google(Gemini)로 보내져요. 이 질문과 관련 법률 이름도 함께 보내요. 이름·전화번호·주소는 빼고 보내 주세요.</p>' +
       '<div class="ai-ask">전화번호·주민등록번호·계좌번호처럼 보이는 숫자는 *** 로 가려서 보내요. 받은 AI 의견은 이 기기 브라우저에만 저장해요.' +
       '<b>보낼 메모</b><p class="ai-memo">' + esc(maskMemo(memo)) + '</p></div>' +
       '<div class="ai-row"><button type="button" class="ai-btn sub" data-ai="cancel">취소</button><button type="button" class="ai-btn fill" data-ai="send">보내기</button></div>';
@@ -1260,7 +1261,12 @@ async function sendAi(){
   renderAi('wait');
   let data = null, code = 0;
   try {
-    const r = await fetch('/api/ai', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memo: maskMemo(memo)})});
+    const r = await fetch('/api/ai', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+      memo: maskMemo(memo),
+      // 그 질문 문장과 결과 화면 "관련 법률" 목록도 함께 보내요 (앱에 원래 있는 글)
+      question: BY_ID[id].q,
+      laws: BY_ID[id].laws.map(l=>({name: l[0], desc: l[1]}))
+    })});
     code = r.status;
     try { data = await r.json(); } catch(e) {}
   } catch(e) {}
