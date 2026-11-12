@@ -120,6 +120,10 @@
   .reset:active{background:var(--ds-pressed)}
   .note{font-size:13px;color:var(--label3);text-align:center;margin:26px 12px 0;line-height:1.65}
   .foot-m{display:none;margin-top:14px;margin-bottom:28px}
+  /* 시작 화면 맨 아래 작은 글자 버튼 (기록이 있을 때만 보여요) */
+  .wipe{display:block;margin:20px auto 0;padding:10px 16px;border:0;border-radius:14px;background:none;color:var(--ds-gray-700);font:inherit;font-size:14px;font-weight:600;line-height:20px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;transition:transform .1s cubic-bezier(.42,0,.58,1),background .1s cubic-bezier(.42,0,.58,1)}
+  .wipe:active{transform:scale(.95);background:var(--ds-pressed)}
+  .wipe[hidden]{display:none}
 
   /* ---------- 답변 화면 ---------- */
   .qnum{display:inline-block;font-size:12px;font-weight:600;line-height:18px;color:var(--accent-ink);background:var(--accent-soft);border-radius:var(--ds-radius-tag);padding:4px 8px;margin-bottom:10px}
@@ -240,6 +244,7 @@
   .btn.plain{background:transparent;color:var(--primary-press);height:46px;font-weight:600;box-shadow:none}
   .btn.plain:active{background:var(--primary-soft)}
   #p3 .scroll{padding-bottom:168px}
+  #p0 .scroll{padding-bottom:176px} /* 아래 버튼이 두 개일 때도 「기록 모두 지우기」가 판에 가리지 않게 */
 
   .toast{position:absolute;left:50%;bottom:116px;z-index:6;width:max-content;max-width:calc(100% - 48px);transform:translate(-50%,8px);background:rgba(20,26,36,.92);color:#fff;font-size:14px;font-weight:600;line-height:22px;border-radius:16px;padding:12px 18px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
   /* 시작 화면: 저장된 기록 안내 */
@@ -370,6 +375,7 @@
             </div>
           </div>
           <p class="note">기준 시점 2026년 10월 · 서울 기준<br>참고용 안내이며 법률 자문이 아니에요. 이 안내를 바탕으로 한 결정과 그 결과에 대해 집콕체크는 책임지지 않아요. 중요한 결정 전에는 변호사·법무사 같은 전문가와 상담하세요.</p>
+          <button type="button" class="wipe" id="wipeAll" hidden>기록 모두 지우기</button>
           <p class="note foot-m" id="footM"></p><!-- 휴대폰에서만 보이는 맨 아래 문구 (내용은 footer에서 복사) -->
         </div>
         <div class="cta">
@@ -1205,7 +1211,8 @@ document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click', 
 
 /* ---------- 메모 AI로 살펴보기 ----------
    사용자가 "보내기"를 누를 때만 메모(가린 것) 하나만 보내요. 지시와 답의 모양은 api/ai.mjs에 있어요.
-   결과는 화면에만 보여 주고 저장하지 않아요. AI 의견은 위 판단 색을 바꾸지 않아요. */
+   받은 AI 의견은 다른 답처럼 이 기기 브라우저에만 저장해요(2026-11-12 사용자와 정함).
+   메모를 고치면 저장된 의견은 보여 주지 않고 다시 살펴보게 해요. AI 의견은 위 판단 색을 바꾸지 않아요. */
 const AI_NOTE = 'AI 의견은 틀릴 수 있어요. 위 판단과 다르면 위 판단을 먼저 따르세요. 참고용 안내이며 법률 자문이 아니에요.';
 let aiTurn = 0; // 결과 화면이 바뀌면 늦게 온 답은 버려요
 // 전화번호·주민등록번호·계좌번호·이메일처럼 보이는 글자를 가려요 (서버에서도 한 번 더 가려요)
@@ -1219,7 +1226,12 @@ const AI_BTN = '<button type="button" class="ai-btn" data-ai="ask">메모 AI로 
 function renderAi(step, data){
   const memo = ans(state.sel).memo.trim(), box = $('r-ai-body');
   $('r-ai').hidden = false;
-  if(!step){ aiTurn++; step = 'start'; }
+  if(!step){
+    aiTurn++; step = 'start';
+    // 저장된 AI 의견이 지금 메모로 받은 것이면 바로 보여 줘요
+    const saved = ans(state.sel).ai;
+    if(memo && saved && saved.memo === maskMemo(memo) && saved.text){ step = 'done'; data = saved; }
+  }
   // 빈 글이면 Gemini를 부르지 않아요
   if(step === 'ask' && !memo) step = 'empty';
   if(step === 'start'){
@@ -1228,7 +1240,7 @@ function renderAi(step, data){
     box.innerHTML = '<p class="ai-text"><b>먼저 글을 적어 주세요</b></p><p class="ai-note">답변 화면의 메모 칸에 들은 말을 적은 뒤 다시 눌러 주세요.</p>' + AI_BTN;
   } else if(step === 'ask'){
     box.innerHTML = '<p class="ai-text">메모가 Google(Gemini)로 보내져요. 이름·전화번호·주소는 빼고 보내 주세요.</p>' +
-      '<div class="ai-ask">전화번호·주민등록번호·계좌번호처럼 보이는 숫자는 *** 로 가려서 보내요. 보낸 메모와 결과는 이 앱에 저장하지 않아요.' +
+      '<div class="ai-ask">전화번호·주민등록번호·계좌번호처럼 보이는 숫자는 *** 로 가려서 보내요. 받은 AI 의견은 이 기기 브라우저에만 저장해요.' +
       '<b>보낼 메모</b><p class="ai-memo">' + esc(maskMemo(memo)) + '</p></div>' +
       '<div class="ai-row"><button type="button" class="ai-btn sub" data-ai="cancel">취소</button><button type="button" class="ai-btn fill" data-ai="send">보내기</button></div>';
   } else if(step === 'wait'){
@@ -1243,7 +1255,7 @@ function renderAi(step, data){
 }
 
 async function sendAi(){
-  const turn = aiTurn, memo = ans(state.sel).memo.trim();
+  const turn = aiTurn, id = state.sel, memo = ans(id).memo.trim();
   if(!memo) return renderAi('empty');
   renderAi('wait');
   let data = null, code = 0;
@@ -1252,8 +1264,11 @@ async function sendAi(){
     code = r.status;
     try { data = await r.json(); } catch(e) {}
   } catch(e) {}
+  const ok = code === 200 && data && typeof data.text === 'string' && data.text;
+  // 받은 의견은 보낸 메모(가린 것)와 함께 기기 안에 저장해요
+  if(ok){ ans(id).ai = {memo: maskMemo(memo), text: data.text}; save(); }
   if(turn !== aiTurn) return;
-  if(code === 200 && data && typeof data.text === 'string' && data.text) renderAi('done', data);
+  if(ok) renderAi('done', data);
   else renderAi('fail');
 }
 
@@ -1341,7 +1356,15 @@ function renderStart(){
   $('savedCount').textContent = Q.filter(q=>isDone(q.id)).length + ' / ' + Q.length + (k ? ' (해당 없음 ' + k + '개 포함)' : '');
   $('startGo').textContent = saved ? '이어서 하기' : '시작하기';
   $('startNew').hidden = !saved;
+  $('wipeAll').hidden = !saved;
 }
+// 시작 화면 맨 아래 「기록 모두 지우기」: 한 번 더 묻고 지운 뒤 처음 온 사람 화면을 보여 줘요
+$('wipeAll').addEventListener('click', ()=>{
+  if(!confirm('적어 둔 답, 메모, AI 참고 의견을 모두 지울까요? 지우면 되돌릴 수 없어요.')) return;
+  clearAll();
+  renderStart();
+  $('p0').querySelector('.scroll').scrollTop = 0;
+});
 $('startGo').addEventListener('click', ()=>{ state.sel = nextOpen(); renderList(); go('p1'); });
 $('startNew').addEventListener('click', ()=>{ clearAll(); go('p1'); });
 
