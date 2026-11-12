@@ -1277,6 +1277,8 @@ $('toAnswer').addEventListener('click', ()=>{
 
 $('toResult').addEventListener('click', ()=>{
   if(!ready(state.sel)) return;
+  // 결과를 보면 확인한 것으로 쳐요(뒤로 가기로 나가도 체크리스트에 체크돼요)
+  finish();
   renderResult();
   go('p3');
 });
